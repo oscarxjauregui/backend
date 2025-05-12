@@ -21,7 +21,10 @@ function Navbar() {
         {isAuthenticated ? (
           <>
             <li>
-              <Link to="/profile">Profile</Link>
+              <Link to="/profile">Perfil</Link>
+            </li>
+            <li>
+              <Link to="/myreservations">Mis Reservaciones</Link>
             </li>
             <li>
               <Link to="/" onClick={() => logout()}>

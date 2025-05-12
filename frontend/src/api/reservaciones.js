@@ -1,4 +1,5 @@
 import api from "./axios";
+import { useVuelosByDestino } from "../context/VuelosByDestinoContext";
 
 export const createReservacion = async (vueloId, asientos) => {
   try {
@@ -13,5 +14,18 @@ export const createReservacion = async (vueloId, asientos) => {
       error.response?.data?.message ||
       "Error desconocido al procesar la reserva"
     );
+  }
+};
+
+export const getUserReservaciones = async () => {
+  try {
+    const response = await api.get("/reservaciones");
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error al obtener las reservaciones del usuario:",
+      error.response?.data || error.message
+    );
+    throw error.response?.data?.message || "Error al obtener tus reservaciones";
   }
 };
