@@ -1,14 +1,19 @@
 // src/pages/VueloDetailsPage.jsx
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useVuelo } from "../context/VueloByIdContext";
 import { useAuth } from "../context/AuthContext";
+import { createReservacion } from "../api/reservaciones";
 
 function VueloDetailsPage() {
   const { id } = useParams();
   const { vuelo, loading, error, fetchVueloById } = useVuelo();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  const [reserving, setReserving] = useState(false);
+  const [reservacionError, setReservacionError] = useState(null);
+  const [reservacionSuccess, setReservacionSuccess] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -33,15 +38,35 @@ function VueloDetailsPage() {
     }
   };
 
-  const handleConfirmarReserva = () => {
+  const handleConfirmarReserva = async () => {
     if (!isAuthenticated) {
       navigate(`/login?redirectTo=/reservar/${id}&action=confirmar`);
       return;
     }
-    console.log("Reserva confirmada para el vuelo:", vuelo);
-    alert(
-      `¡Reserva para ${vuelo.origen} - ${vuelo.destino} en proceso! (Funcionalidad de reserva real no implementada)`
-    );
+    if (vuelo.asientosDisponibles <= 0) {
+      setReservacionError("No hay asientos disponibles para este vuelo.");
+      return;
+    }
+    setReserving(true);
+    setReservacionError(null);
+    setReservacionSuccess(false);
+
+    try {
+      const asientos = 1;
+      await createReservacion(id, asientos);
+      setReservacionSuccess(true);
+      fetchVueloById(id);
+      alert(
+        `¡Reserva confirmada para el vuelo ${vuelo.origen} - ${vuelo.destino}!`
+      );
+    } catch (error) {
+      const errorMessage =
+        error || "Error al procesar la reserva. Inténtalo de nuevo.";
+      setReservacionError(errorMessage);
+      console.error("Error en handleConfirmarReserva:", error);
+    } finally {
+      setReserving(false);
+    }
   };
 
   if (loading) {

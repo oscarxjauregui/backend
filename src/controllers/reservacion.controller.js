@@ -7,10 +7,9 @@ export const createReservacion = async (req, res) => {
   try {
     const { vueloId } = req.params;
     const { asientos } = req.body;
-    const userId = req.user?.id; // Asumiendo que el ID del usuario autenticado está en req.user.id
+    const userId = req.user?.id; 
 
     if (!userId) {
-      // Debería ser manejado por un middleware de autenticación antes, pero es buena práctica verificar
       return res
         .status(401)
         .json({
