@@ -22,6 +22,29 @@ export const getVueloById = async (req, res) => {
   }
 };
 
+export const getVuelosByDestino = async (req, res) => {
+  try {
+    const { destino } = req.params;
+    if (!destino) {
+      return res.status(400).json({ message: "Destino no especificado" });
+    }
+    const vuelos = await Vuelo.find({
+      destino: { $regex: new RegExp(`^${destino}$`, "i") },
+    });
+
+    if (vuelos.length === 0) {
+      return res
+        .status(404)
+        .json({
+          message: "No se encontraron vuelos para el destino especificado",
+        });
+    }
+    res.json(vuelos);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Crear un nuevo vuelo
 export const vueloUpload = async (req, res) => {
   const {
