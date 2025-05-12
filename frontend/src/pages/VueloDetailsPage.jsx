@@ -1,25 +1,20 @@
 // src/pages/VueloDetailsPage.jsx
 import { useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useVuelos } from "../context/VuelosContext";
-import { useAuth } from "../context/AuthContext"; // Para verificar si está autenticado
+import { useVuelo } from "../context/VueloByIdContext";
+import { useAuth } from "../context/AuthContext";
 
 function VueloDetailsPage() {
-  const { id } = useParams(); // Obtener el ID del vuelo de la URL
-  const {
-    selectedVuelo,
-    loadingSelectedVuelo,
-    errorSelectedVuelo,
-    getVueloDetails,
-  } = useVuelos();
-  const { isAuthenticated } = useAuth(); // Para el flujo de reserva
+  const { id } = useParams();
+  const { vuelo, loading, error, fetchVueloById } = useVuelo();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (id) {
-      getVueloDetails(id);
+      fetchVueloById(id);
     }
-  }, [id, getVueloDetails]); // Dependencias para re-ejecutar si cambian
+  }, [id, fetchVueloById]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
@@ -34,27 +29,22 @@ function VueloDetailsPage() {
       };
       return new Date(dateString).toLocaleString("es-ES", options);
     } catch (e) {
-      return "Fecha inválida";
+      return "Fecha inválida", e;
     }
   };
 
   const handleConfirmarReserva = () => {
     if (!isAuthenticated) {
-      // Redirigir a login si no está autenticado, pasando la intención de reservar este vuelo
       navigate(`/login?redirectTo=/reservar/${id}&action=confirmar`);
       return;
     }
-    // Aquí iría la lógica para procesar la reserva
-    // Por ejemplo, llamar a una función del contexto o API para crear una reserva
-    console.log("Reserva confirmada para el vuelo:", selectedVuelo);
+    console.log("Reserva confirmada para el vuelo:", vuelo);
     alert(
-      `¡Reserva para ${selectedVuelo.origen} - ${selectedVuelo.destino} en proceso! (Funcionalidad de reserva real no implementada)`
+      `¡Reserva para ${vuelo.origen} - ${vuelo.destino} en proceso! (Funcionalidad de reserva real no implementada)`
     );
-    // Podrías redirigir a una página de "mis reservas" o de confirmación
-    // navigate('/mis-reservas');
   };
 
-  if (loadingSelectedVuelo) {
+  if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <p className="text-xl text-gray-400">Cargando detalles del vuelo...</p>
@@ -62,10 +52,10 @@ function VueloDetailsPage() {
     );
   }
 
-  if (errorSelectedVuelo) {
+  if (error) {
     return (
       <div className="flex flex-col justify-center items-center min-h-[calc(100vh-200px)]">
-        <p className="text-xl text-red-500 mb-4">Error: {errorSelectedVuelo}</p>
+        <p className="text-xl text-red-500 mb-4">Error: {error}</p>
         <Link
           to="/"
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
@@ -76,7 +66,7 @@ function VueloDetailsPage() {
     );
   }
 
-  if (!selectedVuelo) {
+  if (!vuelo) {
     return (
       <div className="flex flex-col justify-center items-center min-h-[calc(100vh-200px)]">
         <p className="text-xl text-gray-400 mb-4">Vuelo no encontrado.</p>
@@ -90,7 +80,6 @@ function VueloDetailsPage() {
     );
   }
 
-  // Si todo está bien, mostrar los detalles del vuelo
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="bg-zinc-800 p-6 md:p-10 rounded-lg shadow-xl text-white max-w-3xl mx-auto">
@@ -101,54 +90,53 @@ function VueloDetailsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-6">
           <div>
             <p className="text-sm text-gray-400">Origen:</p>
-            <p className="text-xl font-semibold">{selectedVuelo.origen}</p>
+            <p className="text-xl font-semibold">{vuelo.origen}</p>
           </div>
           <div>
             <p className="text-sm text-gray-400">Destino:</p>
-            <p className="text-xl font-semibold">{selectedVuelo.destino}</p>
+            <p className="text-xl font-semibold">{vuelo.destino}</p>
           </div>
           <div>
             <p className="text-sm text-gray-400">Fecha de Salida:</p>
-            <p className="text-lg">{formatDate(selectedVuelo.fechaSalida)}</p>
+            <p className="text-lg">{formatDate(vuelo.fechaSalida)}</p>
           </div>
           <div>
             <p className="text-sm text-gray-400">Fecha de Llegada:</p>
-            <p className="text-lg">{formatDate(selectedVuelo.fechaLlegada)}</p>
+            <p className="text-lg">{formatDate(vuelo.fechaLlegada)}</p>
           </div>
           <div>
             <p className="text-sm text-gray-400">Aerolínea:</p>
-            <p className="text-lg">{selectedVuelo.aerolinea}</p>
+            <p className="text-lg">{vuelo.aerolinea}</p>
           </div>
           <div>
             <p className="text-sm text-gray-400">Avión:</p>
-            <p className="text-lg">{selectedVuelo.avion}</p>
+            <p className="text-lg">{vuelo.avion}</p>
           </div>
           <div>
             <p className="text-sm text-gray-400">Estado del vuelo:</p>
-            <p className="text-lg">{selectedVuelo.estado}</p>
+            <p className="text-lg">{vuelo.estado}</p>
           </div>
           <div>
             <p className="text-sm text-gray-400">Asientos Disponibles:</p>
             <p
               className={`text-lg font-bold ${
-                selectedVuelo.asientosDisponibles > 10
+                vuelo.asientosDisponibles > 10
                   ? "text-green-400"
-                  : selectedVuelo.asientosDisponibles > 0
+                  : vuelo.asientosDisponibles > 0
                   ? "text-yellow-400"
                   : "text-red-500"
               }`}
             >
-              {selectedVuelo.asientosDisponibles}
+              {vuelo.asientosDisponibles}
             </p>
           </div>
         </div>
 
         <div className="border-t border-zinc-700 pt-6 text-center">
           <p className="text-2xl font-bold text-emerald-400 mb-6">
-            Costo Total: $
-            {selectedVuelo.costo ? selectedVuelo.costo.toFixed(2) : "N/A"}
+            Costo Total: ${vuelo.costo ? vuelo.costo.toFixed(2) : "N/A"}
           </p>
-          {selectedVuelo.asientosDisponibles > 0 ? (
+          {vuelo.asientosDisponibles > 0 ? (
             <button
               onClick={handleConfirmarReserva}
               className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-200 ease-in-out"
