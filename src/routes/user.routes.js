@@ -10,14 +10,12 @@ import { adminRequired } from "../middlewares/validateAdmin.js";
 
 const router = Router();
 
-router.post("/createUser", authRequired, createUser);
+router.post("/createUser", authRequired, adminRequired, createUser);
 
 router.get("/getUsers", authRequired, getUsers);
 
 router.get("/getUser/:userId", authRequired, getUser);
 
 router.delete("/deleteUser/:userId", authRequired, deleteUser);
-
-
 
 export default router;
