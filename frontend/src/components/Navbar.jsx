@@ -11,6 +11,8 @@ const Navbar = () => {
     setOpen(false);
   };
 
+  const isAdmin = isAuthenticated && user && user.rol === "admin";
+
   return (
     <header className="bg-gray-900 shadow-md fixed top-0 left-0 right-0 z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between p-4">
@@ -41,12 +43,22 @@ const Navbar = () => {
               <Link to="/profile" className="hover:text-white transition">
                 Perfil
               </Link>
-              <Link
-                to="/myreservations"
-                className="hover:text-white transition"
-              >
-                Mis Reservaciones
-              </Link>
+
+              {isAdmin ? (
+                <Link to="/admin/panel" className="hover:text-white transition">
+                  {" "}
+                  {/* Necesitarás crear esta ruta */}
+                  Panel
+                </Link>
+              ) : (
+                <Link
+                  to="/myreservations"
+                  className="hover:text-white transition"
+                >
+                  Mis Reservaciones
+                </Link>
+              )}
+
               <Link
                 to="/"
                 onClick={() => {
@@ -110,13 +122,23 @@ const Navbar = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    to="/myreservations"
-                    className="text-sm text-white"
-                    onClick={handleLinkClick}
-                  >
-                    Mis Reservaciones
-                  </Link>
+                  {isAdmin ? (
+                    <Link
+                      to="/admin/panel" // Necesitarás crear esta ruta
+                      className="text-sm text-white"
+                      onClick={handleLinkClick}
+                    >
+                      Panel
+                    </Link>
+                  ) : (
+                    <Link
+                      to="/myreservations"
+                      className="text-sm text-white"
+                      onClick={handleLinkClick}
+                    >
+                      Mis Reservaciones
+                    </Link>
+                  )}
                 </li>
                 <li>
                   <Link

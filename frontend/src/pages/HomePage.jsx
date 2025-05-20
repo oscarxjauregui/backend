@@ -1,6 +1,8 @@
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { FiChevronRight } from "react-icons/fi";
+import { FiChevronRight, FiSearch } from "react-icons/fi";
+import { useVuelos } from "../context/VuelosContext";
 // Importa todas las imágenes necesarias para los destinos
 import cdmxImg from "/images/cdmx.jpg";
 import cancunImg from "/images/cancun.jpg";
@@ -16,91 +18,142 @@ import tijuanaImg from "/images/tijuana.jpg";
 // import tolucaImg from "../assets/vuelos/toluca.jpg";
 // import chihuahuaImg from "../assets/vuelos/chihuahua.jpg";
 
-import { useMemo } from "react";
-
 const Home = () => {
   const navigate = useNavigate();
+  const { vuelos, loading, error } = useVuelos();
+  console.log("Vuelos data from context:", vuelos);
+
+  const [searchDestination, setSearchDestination] = useState("");
+  const [searchDate, setSearchDate] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return "";
+    const parts = dateString.split("/");
+    if (parts.length === 3) {
+      return `${parts[2]}-${parts[1].padStart(2, "0")}-${parts[0].padStart(
+        2,
+        "0"
+      )}`;
+    }
+    return dateString;
+  };
+
+  const formatDateForComparison = (dateInput) => {
+    if (!dateInput) return "";
+    const parts = dateInput.split("-");
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    return dateInput;
+  };
+
+  useEffect(() => {
+    // Cambia esta línea para verificar si vuelos es un array directamente
+    if (!Array.isArray(vuelos)) {
+      console.warn("Vuelos data is not an array:", vuelos);
+      setSearchResults([]); // Asegura que searchResults sea un array vacío si los datos no son correctos
+      return;
+    }
+
+    // Ahora filtra directamente el array `vuelos`
+    const filtered = vuelos.filter((vuelo) => {
+      const matchesDestination = searchDestination
+        ? vuelo.destino.toLowerCase().includes(searchDestination.toLowerCase())
+        : true;
+
+      const matchesDate = searchDate
+        ? vuelo.fecha === formatDateForComparison(searchDate)
+        : true;
+
+      return matchesDestination && matchesDate;
+    });
+    setSearchResults(filtered);
+  }, [searchDestination, searchDate, vuelos]);
 
   // Datos combinados y enriquecidos para los destinos.
   // Cada objeto incluye `nombre` (para mostrar), `slug` (para la URL),
   // y todos los detalles de vuelo (precio, fecha, etc.) junto con la imagen importada.
-  const allDestinosData = [
-    {
-      nombre: "Ciudad de México",
-      slug: "cdmx",
-      precio: "$1,299 MXN",
-      img: cdmxImg,
-      fecha: "15/06/2025",
-      asientos: 25,
-      avion: "Airbus A320",
-    },
-    {
-      nombre: "Cancún",
-      slug: "cancun",
-      precio: "$1,899 MXN",
-      img: cancunImg,
-      fecha: "20/06/2025",
-      asientos: 18,
-      avion: "Boeing 737",
-    },
-    {
-      nombre: "Monterrey",
-      slug: "monterrey",
-      precio: "$1,499 MXN",
-      img: monterreyImg,
-      fecha: "22/06/2025",
-      asientos: 30,
-      avion: "Embraer 190",
-    },
-    {
-      nombre: "Guadalajara",
-      slug: "guadalajara",
-      precio: "$1,399 MXN",
-      img: guadalajaraImg,
-      fecha: "21/06/2025",
-      asientos: 16,
-      avion: "Boeing 737 MAX",
-    },
-    {
-      nombre: "Puebla",
-      slug: "puebla",
-      precio: "$999 MXN",
-      img: pueblaImg,
-      fecha: "18/06/2025",
-      asientos: 28,
-      avion: "CRJ 700",
-    },
-    {
-      nombre: "Veracruz",
-      slug: "veracruz",
-      precio: "$1,099 MXN",
-      img: veracruzImg,
-      fecha: "19/06/2025",
-      asientos: 27,
-      avion: "Airbus A320neo",
-    },
-    {
-      nombre: "Tijuana",
-      slug: "tijuana",
-      precio: "$1,599 MXN",
-      img: tijuanaImg,
-      fecha: "23/06/2025",
-      asientos: 20,
-      avion: "Boeing 757",
-    },
-    // Si necesitas los destinos adicionales de tu HomePage provisional, agrégalos aquí con sus imágenes importadas
-    // { nombre: "Querétaro", slug: "queretaro", precio: "$950 MXN", img: queretaroImg, fecha: "28/06/2025", asientos: 20, avion: "Embraer 175" },
-    // { nombre: "Toluca", slug: "toluca", precio: "$800 MXN", img: tolucaImg, fecha: "01/07/2025", asientos: 35, avion: "Cessna 208" },
-    // { nombre: "Chihuahua", slug: "chihuahua", precio: "$1,450 MXN", img: chihuahuaImg, fecha: "05/07/2025", asientos: 22, avion: "Airbus A320" },
-  ];
+  const allDestinosData = useMemo(
+    () => [
+      {
+        nombre: "Ciudad de México",
+        slug: "CDMX",
+        precio: "$1,299 MXN",
+        img: cdmxImg,
+        fecha: "15/06/2025",
+        asientos: 25,
+        avion: "Airbus A320",
+      },
+      {
+        nombre: "Cancún",
+        slug: "cancun",
+        precio: "$1,899 MXN",
+        img: cancunImg,
+        fecha: "20/06/2025",
+        asientos: 18,
+        avion: "Boeing 737",
+      },
+      {
+        nombre: "Monterrey",
+        slug: "monterrey",
+        precio: "$1,499 MXN",
+        img: monterreyImg,
+        fecha: "22/06/2025",
+        asientos: 30,
+        avion: "Embraer 190",
+      },
+      {
+        nombre: "Guadalajara",
+        slug: "guadalajara",
+        precio: "$1,399 MXN",
+        img: guadalajaraImg,
+        fecha: "21/06/2025",
+        asientos: 16,
+        avion: "Boeing 737 MAX",
+      },
+      {
+        nombre: "Puebla",
+        slug: "puebla",
+        precio: "$999 MXN",
+        img: pueblaImg,
+        fecha: "18/06/2025",
+        asientos: 28,
+        avion: "CRJ 700",
+      },
+      {
+        nombre: "Veracruz",
+        slug: "veracruz",
+        precio: "$1,099 MXN",
+        img: veracruzImg,
+        fecha: "19/06/2025",
+        asientos: 27,
+        avion: "Airbus A320neo",
+      },
+      {
+        nombre: "Tijuana",
+        slug: "tijuana",
+        precio: "$1,599 MXN",
+        img: tijuanaImg,
+        fecha: "23/06/2025",
+        asientos: 20,
+        avion: "Boeing 757",
+      },
+      // Si necesitas los destinos adicionales de tu HomePage provisional, agrégalos aquí con sus imágenes importadas
+      // { nombre: "Querétaro", slug: "queretaro", precio: "$950 MXN", img: queretaroImg, fecha: "28/06/2025", asientos: 20, avion: "Embraer 175" },
+      // { nombre: "Toluca", slug: "toluca", precio: "$800 MXN", img: tolucaImg, fecha: "01/07/2025", asientos: 35, avion: "Cessna 208" },
+      // { nombre: "Chihuahua", slug: "chihuahua", precio: "$1,450 MXN", img: chihuahuaImg, fecha: "05/07/2025", asientos: 22, avion: "Airbus A320" },
+    ],
+    []
+  );
 
   // Muestra solo los primeros 4 destinos en la página principal, consistente con tu diseño original de 'Home'.
   const destinosPrincipales = allDestinosData.slice(0, 4);
 
   return (
-    <div className="bg-white text-gray-900 font-sans">
+    <div className="bg-white text-gray-900 font-sans pt-16">
       {/* Bienvenida */}
-      <section className="py-24 bg-gradient-to-br from-white to-gray-100 text-center">
+      <section className="py-20 bg-gradient-to-br from-white to-gray-100 text-center">
         <motion.h1
           className="text-5xl md:text-6xl font-extrabold mb-4"
           initial={{ opacity: 0, y: -20 }}
@@ -120,8 +173,108 @@ const Home = () => {
         </motion.p>
       </section>
 
+      {/* --- Buscador de Vuelos --- */}
+      <section className="bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <h2 className="text-4xl font-bold text-center mb-8">
+            Encuentra tu próximo vuelo
+          </h2>
+          <div className="flex flex-col md:flex-row gap-4 mb-8 items-center justify-center">
+            <div className="relative w-full md:w-1/3">
+              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar destino (ej. Cancún)"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                value={searchDestination}
+                onChange={(e) => setSearchDestination(e.target.value)}
+              />
+            </div>
+            <input
+              type="date"
+              className="w-full md:w-1/4 px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+              value={searchDate}
+              onChange={(e) => setSearchDate(e.target.value)}
+            />
+          </div>
+
+          {/* Resultados de la Búsqueda */}
+          {loading ? (
+            <p className="text-center text-gray-600 text-xl py-8">
+              Cargando vuelos...
+            </p>
+          ) : error ? (
+            <p className="text-center text-red-500 text-xl py-8">
+              Error: {error}
+            </p>
+          ) : searchDestination || searchDate ? ( // Solo muestra resultados si hay una búsqueda
+            <>
+              <h3 className="text-3xl font-bold text-center mb-6">
+                Resultados de la Búsqueda ({searchResults.length} vuelos)
+              </h3>
+              {searchResults.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                  {searchResults.map((vuelo) => (
+                    <motion.div
+                      key={vuelo._id} // Usa el _id del vuelo de la API como key
+                      className="relative group cursor-pointer bg-white rounded-2xl shadow-lg overflow-hidden"
+                      whileHover={{ scale: 1.03 }}
+                      initial={{ opacity: 0, y: 40 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4 }}
+                      viewport={{ once: true }}
+                      onClick={() => navigate(`/reservar/${vuelo._id}`)} // Navega a la página de detalle
+                    >
+                      {/* Puedes usar una imagen genérica o intentar mapear con las imágenes de destinos populares si tienes */}
+                      <img
+                        src={
+                          allDestinosData.find(
+                            (d) =>
+                              d.slug.toLowerCase() ===
+                              vuelo.destino.toLowerCase()
+                          )?.img ||
+                          "https://via.placeholder.com/400x250?text=Vuelo+a+" +
+                            vuelo.destino
+                        }
+                        alt={`Vista de ${vuelo.destino}`}
+                        className="w-full h-48 object-cover"
+                      />
+                      <div className="p-5 space-y-2">
+                        <h3 className="text-2xl font-semibold">
+                          {vuelo.destino}
+                        </h3>
+                        <p className="text-gray-700">Origen: {vuelo.origen}</p>
+                        <p className="text-gray-500">
+                          Fecha: {vuelo.fechaSalida}
+                        </p>
+                        <p className="text-blue-600 font-bold text-xl">
+                          Precio: ${vuelo.costo} MXN
+                        </p>
+                      </div>
+                      <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span className="text-white text-lg font-semibold">
+                          Ver detalles y reservar
+                        </span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-gray-600 text-xl py-8">
+                  No se encontraron vuelos que coincidan con tu búsqueda.
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="text-center text-gray-500 text-xl py-8">
+              Ingresa un destino o una fecha para buscar vuelos.
+            </p>
+          )}
+        </div>
+      </section>
+
       {/* Sección de Destinos Populares (anteriormente 'Vuelos') */}
-      <section className="bg-gray-100">
+      <section className="bg-gray-100 py-10">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-center mb-12">
             <h2 className="text-4xl font-bold">Destinos Populares</h2>
@@ -171,16 +324,6 @@ const Home = () => {
                   <p>
                     <span className="font-medium">Destino:</span>{" "}
                     {destino.nombre}
-                  </p>
-                  <p>
-                    <span className="font-medium">Fecha:</span> {destino.fecha}
-                  </p>
-                  <p>
-                    <span className="font-medium">Asientos disponibles:</span>{" "}
-                    {destino.asientos}
-                  </p>
-                  <p>
-                    <span className="font-medium">Avión:</span> {destino.avion}
                   </p>
                   <p
                     className="text-center mt-3 text-sm text-blue-600 font-medium hover:underline"

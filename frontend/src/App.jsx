@@ -12,6 +12,7 @@ import ProfilePage from "./pages/ProfilePage";
 import VueloDetailsPage from "./pages/VueloDetailsPage";
 import VuelosByDestinoPage from "./pages/VuelosByDestinoPage";
 import MyReservations from "./pages/MyReservationsPage";
+import PanelAdminPage from "./pages/PanelAdminPage";
 
 import ProtectedRoute from "./ProtectedRoute";
 import Navbar from "./components/Navbar";
@@ -41,6 +42,10 @@ function App() {
                       path="/myreservations"
                       element={<MyReservations />}
                     />
+                  </Route>
+
+                  <Route element={<ProtectedRoute requiredRole="admin" />}>
+                    <Route path="/admin/panel" element={<PanelAdminPage />} />
                   </Route>
                 </Routes>
               </BrowserRouter>
