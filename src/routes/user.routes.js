@@ -16,6 +16,6 @@ router.get("/getUsers", authRequired, getUsers);
 
 router.get("/getUser/:userId", authRequired, getUser);
 
-router.delete("/deleteUser/:userId", authRequired, deleteUser);
+router.delete("/deleteUser/:userId", authRequired, adminRequired, deleteUser);
 
 export default router;
