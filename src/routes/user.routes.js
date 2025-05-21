@@ -4,6 +4,9 @@ import {
   getUsers,
   getUser,
   deleteUser,
+  getUsersByRole,
+  getPilotos,
+  getAzafatas,
 } from "../controllers/users.controller.js";
 import { authRequired } from "../middlewares/validateToken.js";
 import { adminRequired } from "../middlewares/validateAdmin.js";
@@ -17,5 +20,16 @@ router.get("/getUsers", authRequired, getUsers);
 router.get("/getUser/:userId", authRequired, getUser);
 
 router.delete("/deleteUser/:userId", authRequired, adminRequired, deleteUser);
+
+router.get(
+  "/getUsersByRole/:role",
+  authRequired,
+  adminRequired,
+  getUsersByRole
+);
+
+router.get("/pilotos", authRequired, getPilotos);
+
+router.get("/azafatas", authRequired, getAzafatas);
 
 export default router;

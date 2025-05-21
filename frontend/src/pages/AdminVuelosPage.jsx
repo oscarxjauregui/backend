@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAdminVuelos } from "../context/AdminVuelosContex"; // Asegúrate de que la ruta sea correcta
+import { useUsers } from "../context/UsersContext"; // Asegúrate de que la ruta sea correcta
 
 const AdminVuelosPage = () => {
   const {
@@ -11,6 +12,8 @@ const AdminVuelosPage = () => {
     updateAdminVuelo,
     deleteAdminVuelo,
   } = useAdminVuelos();
+
+  const { pilotos, azafatas, loadingUsers, errorUsers } = useUsers();
 
   const [formData, setFormData] = useState({
     origen: "",
@@ -23,7 +26,7 @@ const AdminVuelosPage = () => {
     azafata1: "",
     azafata2: "",
     azafata3: "",
-    imagen: null, // Cambié la imagen a un estado de archivo
+    //    imagen: null,
   });
 
   const [editingVueloId, setEditingVueloId] = useState(null);
@@ -34,12 +37,6 @@ const AdminVuelosPage = () => {
   const [filterDestino, setFilterDestino] = useState("");
   const [filterFecha, setFilterFecha] = useState("");
   const [filteredVuelos, setFilteredVuelos] = useState([]);
-
-  // Opciones para el avión, piloto, copiloto y azafatas
-  const aviones = ["Avión A", "Avión B", "Avión C"];
-  const pilotos = ["Piloto A", "Piloto B", "Piloto C"];
-  const copilotos = ["Copiloto A", "Copiloto B", "Copiloto C"];
-  const azafatas = ["Azafata 1", "Azafata 2", "Azafata 3"];
 
   // Efecto para filtrar vuelos cada vez que cambian los filtros o la lista de vuelos
   useEffect(() => {
@@ -68,15 +65,15 @@ const AdminVuelosPage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Si necesitas enviar el archivo directamente al backend:
-      setFormData({ ...formData, imagen: file });
-      // Si solo necesitas la URL para mostrarla en el frontend antes de subir:
-      // setFormData({ ...formData, imagen: URL.createObjectURL(file) });
-    }
-  };
+  //   const handleImageChange = (e) => {
+  //     const file = e.target.files[0];
+  //     if (file) {
+  //       // Si necesitas enviar el archivo directamente al backend:
+  //       setFormData({ ...formData, imagen: file });
+  //       // Si solo necesitas la URL para mostrarla en el frontend antes de subir:
+  //       // setFormData({ ...formData, imagen: URL.createObjectURL(file) });
+  //     }
+  //   };
 
   const resetForm = () => {
     setFormData({
@@ -90,7 +87,7 @@ const AdminVuelosPage = () => {
       azafata1: "",
       azafata2: "",
       azafata3: "",
-      imagen: null,
+      //   imagen: null,
     });
     setEditingVueloId(null);
     setShowModal(false); // Ocultar el modal al resetear el formulario
@@ -100,30 +97,27 @@ const AdminVuelosPage = () => {
     e.preventDefault();
     setMessage(null);
 
-    // Si tu API espera FormData para enviar archivos, tendrías que construirlo así:
-    const dataToSend = new FormData();
-    for (const key in formData) {
-      dataToSend.append(key, formData[key]);
-    }
-
     let res;
     if (editingVueloId) {
       const confirmUpdate = window.confirm(
         "¿Estás seguro de que deseas actualizar este vuelo?"
       );
       if (confirmUpdate) {
-        // Pasa dataToSend si tu API espera FormData para la actualización
-        res = await updateAdminVuelo(editingVueloId, dataToSend);
+        const dataToUpdate = {};
+        for (const key in formData) {
+          if (formData[key] !== "" && formData[key] !== null) {
+            dataToUpdate[key] = formData[key];
+          }
+        }
+        res = await updateAdminVuelo(editingVueloId, dataToUpdate);
       }
     } else {
-      // Pasa dataToSend si tu API espera FormData para la creación
-      res = await createAdminVuelo(dataToSend);
+      res = await createAdminVuelo(formData);
     }
 
     if (res && res.success) {
       setMessage({ type: "success", text: res.message });
-      resetForm(); // Resetear y ocultar el modal
-      // No necesitamos isFormVisible, showModal lo maneja
+      resetForm();
     } else if (res && res.message) {
       setMessage({ type: "error", text: res.message });
     }
@@ -151,19 +145,20 @@ const AdminVuelosPage = () => {
   const handleEdit = (vueloToEdit) => {
     setEditingVueloId(vueloToEdit._id || vueloToEdit.id);
     setFormData({
-      origen: vueloToEdit.origen,
-      destino: vueloToEdit.destino,
-      fechaSalida: vueloToEdit.fechaSalida,
-      avion: vueloToEdit.avion,
-      costo: vueloToEdit.costo,
-      piloto: vueloToEdit.piloto,
-      copiloto: vueloToEdit.copiloto,
-      azafata1: vueloToEdit.azafata1,
-      azafata2: vueloToEdit.azafata2,
-      azafata3: vueloToEdit.azafata3,
-      imagen: vueloToEdit.imagen || null, // Mantener la imagen si existe
+      origen: vueloToEdit.origen || "", // No requerido para actualizar
+      destino: vueloToEdit.destino || "", // No requerido para actualizar
+      fechaSalida: vueloToEdit.fechaSalida || "",
+      hora: vueloToEdit.hora || "", // Cargar la hora
+      avion: vueloToEdit.avion || "",
+      costo: vueloToEdit.costo || "",
+      piloto: vueloToEdit.piloto || "",
+      copiloto: vueloToEdit.copiloto || "",
+      azafata1: vueloToEdit.azafata1 || "",
+      azafata2: vueloToEdit.azafata2 || "",
+      azafata3: vueloToEdit.azafata3 || "",
+      // imagen: vueloToEdit.imagen || null, // No cargar imagen al editar si no se va a manejar
     });
-    setShowModal(true); // Mostrar el modal al editar
+    setShowModal(true);
   };
 
   // Manejo de mensajes de error/éxito del contexto
@@ -171,12 +166,16 @@ const AdminVuelosPage = () => {
     if (error) {
       setMessage({ type: "error", text: error });
     }
-  }, [error]);
+    // También maneja errores del contexto de usuarios
+    if (errorUsers) {
+      setMessage({ type: "error", text: errorUsers });
+    }
+  }, [error, errorUsers]);
 
-  if (loading) {
+  if (loading || loadingUsers) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-xl text-gray-700">Cargando vuelos...</p>
+        <p className="text-xl text-gray-700">Cargando datos...</p>
       </div>
     );
   }
@@ -215,8 +214,8 @@ const AdminVuelosPage = () => {
         {/* Botón para abrir el modal de creación */}
         <button
           onClick={() => {
-            resetForm(); // Limpiar el formulario antes de crear
-            setShowModal(true); // Mostrar el modal
+            resetForm();
+            setShowModal(true);
           }}
           className="bg-black hover:bg-gray-800 text-white py-3 px-6 rounded-md mb-8"
         >
@@ -234,10 +233,10 @@ const AdminVuelosPage = () => {
                     : "Crear Nuevo Vuelo"}
                 </h2>
                 <button
-                  onClick={() => resetForm()} // Cierra el modal y resetea el formulario
+                  onClick={() => resetForm()}
                   className="text-gray-500 hover:text-gray-800 text-2xl font-bold"
                 >
-                  &times; {/* Carácter 'x' para cerrar */}
+                  &times;
                 </button>
               </div>
 
@@ -245,144 +244,260 @@ const AdminVuelosPage = () => {
                 onSubmit={handleSubmit}
                 className="grid md:grid-cols-2 gap-6"
               >
-                <input
-                  type="text"
-                  name="origen"
-                  placeholder="Origen"
-                  value={formData.origen}
-                  onChange={handleChange}
-                  required
-                  className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800"
-                />
-                <input
-                  type="text"
-                  name="destino"
-                  placeholder="Destino"
-                  value={formData.destino}
-                  onChange={handleChange}
-                  required
-                  className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800"
-                />
-                <input
-                  type="date"
-                  name="fechaSalida"
-                  value={formData.fechaSalida}
-                  onChange={handleChange}
-                  required
-                  className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800"
-                />
-                <select
-                  name="avion"
-                  value={formData.avion}
-                  onChange={handleChange}
-                  required
-                  className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800"
-                >
-                  <option value="">Seleccionar Avión</option>
-                  {aviones.map((avion, index) => (
-                    <option key={index} value={avion}>
-                      {avion}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="number"
-                  name="costo"
-                  placeholder="Costo USD"
-                  value={formData.costo}
-                  onChange={handleChange}
-                  required
-                  className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800"
-                />
-                <select
-                  name="piloto"
-                  value={formData.piloto}
-                  onChange={handleChange}
-                  required
-                  className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800"
-                >
-                  <option value="">Seleccionar Piloto</option>
-                  {pilotos.map((piloto, index) => (
-                    <option key={index} value={piloto}>
-                      {piloto}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  name="copiloto"
-                  value={formData.copiloto}
-                  onChange={handleChange}
-                  required
-                  className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800"
-                >
-                  <option value="">Seleccionar Copiloto</option>
-                  {copilotos.map((copiloto, index) => (
-                    <option key={index} value={copiloto}>
-                      {copiloto}
-                    </option>
-                  ))}
-                </select>
-                <div className="grid md:grid-cols-3 gap-4 col-span-full">
-                  <select
-                    name="azafata1"
-                    value={formData.azafata1}
-                    onChange={handleChange}
-                    required
-                    className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800"
+                {/* Origen */}
+                <div className="relative">
+                  {" "}
+                  {/* Añadido div para el label */}
+                  <label
+                    htmlFor="origen"
+                    className="absolute -top-3 left-3 bg-white px-1 text-xs text-gray-600"
                   >
-                    <option value="">Azafata 1</option>
-                    {azafatas.map((azafata, index) => (
-                      <option key={index} value={azafata}>
-                        {azafata}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    name="azafata2"
-                    value={formData.azafata2}
+                    Origen
+                  </label>
+                  <input
+                    type="text"
+                    id="origen" // Agregado ID para asociar con el label
+                    name="origen"
+                    placeholder="Origen"
+                    value={formData.origen}
                     onChange={handleChange}
-                    required
-                    className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800"
+                    // required={!editingVueloId} // Solo requerido para creación
+                    className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
+                  />
+                </div>
+                {/* Destino */}
+                <div className="relative">
+                  <label
+                    htmlFor="destino"
+                    className="absolute -top-3 left-3 bg-white px-1 text-xs text-gray-600"
                   >
-                    <option value="">Azafata 2</option>
-                    {azafatas.map((azafata, index) => (
-                      <option key={index} value={azafata}>
-                        {azafata}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    name="azafata3"
-                    value={formData.azafata3}
+                    Destino
+                  </label>
+                  <input
+                    type="text"
+                    id="destino"
+                    name="destino"
+                    placeholder="Destino"
+                    value={formData.destino}
                     onChange={handleChange}
-                    required
-                    className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800"
+                    // required={!editingVueloId} // Solo requerido para creación
+                    className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
+                  />
+                </div>
+                {/* Fecha Salida */}
+                <div className="relative">
+                  <label
+                    htmlFor="fechaSalida"
+                    className="absolute -top-3 left-3 bg-white px-1 text-xs text-gray-600"
                   >
-                    <option value="">Azafata 3</option>
-                    {azafatas.map((azafata, index) => (
-                      <option key={index} value={azafata}>
-                        {azafata}
-                      </option>
-                    ))}
+                    Fecha de Salida
+                  </label>
+                  <input
+                    type="date"
+                    id="fechaSalida"
+                    name="fechaSalida"
+                    value={formData.fechaSalida}
+                    onChange={handleChange}
+                    // required={!editingVueloId} // Solo requerido para creación
+                    className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
+                  />
+                </div>
+                {/* Hora */}
+                <div className="relative">
+                  <label
+                    htmlFor="hora"
+                    className="absolute -top-3 left-3 bg-white px-1 text-xs text-gray-600"
+                  >
+                    Hora de Salida
+                  </label>
+                  <input
+                    type="time" // Tipo de input para hora
+                    id="hora"
+                    name="hora"
+                    value={formData.hora}
+                    onChange={handleChange}
+                    // required={!editingVueloId} // Solo requerido para creación
+                    className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
+                  />
+                </div>
+                {/* Avión */}
+                <div className="relative">
+                  <label
+                    htmlFor="avion"
+                    className="absolute -top-3 left-3 bg-white px-1 text-xs text-gray-600"
+                  >
+                    Avión
+                  </label>
+                  <input
+                    type="text" // Cambiado de select a input type="text"
+                    id="avion"
+                    name="avion"
+                    placeholder="Ej: Boeing 747" // Placeholder más apropiado
+                    value={formData.avion}
+                    onChange={handleChange}
+                    required={!editingVueloId} // Mantén si es requerido para la creación
+                    className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
+                  />
+                </div>
+
+                {/* Costo */}
+                <div className="relative">
+                  <label
+                    htmlFor="costo"
+                    className="absolute -top-3 left-3 bg-white px-1 text-xs text-gray-600"
+                  >
+                    Costo USD
+                  </label>
+                  <input
+                    type="number"
+                    id="costo"
+                    name="costo"
+                    placeholder="Costo USD"
+                    value={formData.costo}
+                    onChange={handleChange}
+                    // required={!editingVueloId} // Solo requerido para creación
+                    className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
+                  />
+                </div>
+                {/* Piloto */}
+                <div className="relative">
+                  <label
+                    htmlFor="piloto"
+                    className="absolute -top-3 left-3 bg-white px-1 text-xs text-gray-600"
+                  >
+                    Piloto
+                  </label>
+                  <select
+                    id="piloto"
+                    name="piloto"
+                    value={formData.piloto}
+                    onChange={handleChange}
+                    required={!editingVueloId}
+                    className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
+                  >
+                    <option value="">Seleccionar Piloto</option>
+                    {pilotos.map(
+                      (
+                        piloto // 'piloto' es ahora un objeto de usuario
+                      ) => (
+                        <option key={piloto._id} value={piloto._id}>
+                          {" "}
+                          {/* El value debe ser el ID */}
+                          {`${piloto.nombre} ${piloto.apellido}`}{" "}
+                          {/* Lo que se muestra al usuario */}
+                        </option>
+                      )
+                    )}
                   </select>
                 </div>
-                <input
-                  type="file"
-                  name="imagen"
-                  onChange={handleImageChange}
-                  className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 col-span-full"
-                />
-                {/* Opcional: Mostrar imagen actual si estamos editando y hay una imagen */}
-                {editingVueloId && typeof formData.imagen === "string" && (
-                  <div className="col-span-full">
-                    <p className="text-sm text-gray-600 mb-2">Imagen actual:</p>
-                    <img
-                      src={formData.imagen}
-                      alt="Imagen actual del vuelo"
-                      className="w-32 h-32 object-cover rounded-md"
-                    />
+
+                {/* Copiloto */}
+                <div className="relative">
+                  <label
+                    htmlFor="copiloto"
+                    className="absolute -top-3 left-3 bg-white px-1 text-xs text-gray-600"
+                  >
+                    Copiloto
+                  </label>
+                  <select
+                    id="copiloto"
+                    name="copiloto"
+                    value={formData.copiloto} // formData.copiloto ahora debe almacenar el _id del copiloto
+                    onChange={handleChange}
+                    className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
+                  >
+                    <option value="">Seleccionar Copiloto</option>
+                    {pilotos.map(
+                      (
+                        copiloto // 'copiloto' es ahora un objeto de usuario
+                      ) => (
+                        <option key={copiloto._id} value={copiloto._id}>
+                          {`${copiloto.nombre} ${copiloto.apellido}`}
+                        </option>
+                      )
+                    )}
+                  </select>
+                </div>
+                {/* Azafata 1 */}
+                <div className="grid md:grid-cols-3 gap-4 col-span-full">
+                  {/* Azafata 1 */}
+                  <div className="relative">
+                    <label
+                      htmlFor="azafata1"
+                      className="absolute -top-3 left-3 bg-white px-1 text-xs text-gray-600"
+                    >
+                      Azafata 1
+                    </label>
+                    <select
+                      id="azafata1"
+                      name="azafata1"
+                      value={formData.azafata1}
+                      onChange={handleChange}
+                      className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
+                      // REMOVIDO: No hay 'required' aquí, lo que lo hace opcional
+                    >
+                      <option value="">Azafata 1</option>{" "}
+                      {/* Esta opción con value="" es crucial */}
+                      {azafatas.map((azafata) => (
+                        <option key={azafata._id} value={azafata._id}>
+                          {`${azafata.nombre} ${azafata.apellido}`}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                )}
+
+                  {/* Azafata 2 */}
+                  <div className="relative">
+                    <label
+                      htmlFor="azafata2"
+                      className="absolute -top-3 left-3 bg-white px-1 text-xs text-gray-600"
+                    >
+                      Azafata 2
+                    </label>
+                    <select
+                      id="azafata2"
+                      name="azafata2"
+                      value={formData.azafata2}
+                      onChange={handleChange}
+                      className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
+                      // REMOVIDO: No hay 'required' aquí
+                    >
+                      <option value="">Azafata 2</option>
+                      {azafatas.map((azafata) => (
+                        <option key={azafata._id} value={azafata._id}>
+                          {`${azafata.nombre} ${azafata.apellido}`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Azafata 3 */}
+                  <div className="relative">
+                    <label
+                      htmlFor="azafata3"
+                      className="absolute -top-3 left-3 bg-white px-1 text-xs text-gray-600"
+                    >
+                      Azafata 3
+                    </label>
+                    <select
+                      id="azafata3"
+                      name="azafata3"
+                      value={formData.azafata3}
+                      onChange={handleChange}
+                      className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
+                      // REMOVIDO: No hay 'required' aquí
+                    >
+                      <option value="">Azafata 3</option>
+                      {azafatas.map((azafata) => (
+                        <option key={azafata._id} value={azafata._id}>
+                          {`${azafata.nombre} ${azafata.apellido}`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Botón de Submit */}
                 <button
                   type="submit"
                   className="bg-black hover:bg-gray-800 text-white py-4 rounded-md mt-6 w-full col-span-full"
@@ -402,20 +517,40 @@ const AdminVuelosPage = () => {
             Filtros de Vuelos
           </h2>
           <div className="grid md:grid-cols-2 gap-4">
-            <input
-              type="text"
-              placeholder="Filtrar por Destino"
-              value={filterDestino}
-              onChange={(e) => setFilterDestino(e.target.value)}
-              className="p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800"
-            />
-            <input
-              type="date"
-              placeholder="Filtrar por Fecha"
-              value={filterFecha}
-              onChange={(e) => setFilterFecha(e.target.value)}
-              className="p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800"
-            />
+            {/* Filtro por Destino */}
+            <div className="relative">
+              <label
+                htmlFor="filterDestino"
+                className="absolute -top-3 left-3 bg-white px-1 text-xs text-gray-600"
+              >
+                Filtrar por Destino
+              </label>
+              <input
+                type="text"
+                id="filterDestino"
+                placeholder="Filtrar por Destino"
+                value={filterDestino}
+                onChange={(e) => setFilterDestino(e.target.value)}
+                className="p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
+              />
+            </div>
+            {/* Filtro por Fecha */}
+            <div className="relative">
+              <label
+                htmlFor="filterFecha"
+                className="absolute -top-3 left-3 bg-white px-1 text-xs text-gray-600"
+              >
+                Filtrar por Fecha
+              </label>
+              <input
+                type="date"
+                id="filterFecha"
+                placeholder="Filtrar por Fecha"
+                value={filterFecha}
+                onChange={(e) => setFilterFecha(e.target.value)}
+                className="p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
+              />
+            </div>
           </div>
         </div>
 
@@ -441,7 +576,10 @@ const AdminVuelosPage = () => {
                 <h3 className="text-xl font-semibold text-gray-900">
                   {vuelo.origen} a {vuelo.destino}
                 </h3>
-                <p className="text-gray-600">Fecha: {vuelo.fechaSalida}</p>
+                <p className="text-gray-600">
+                  Fecha: {vuelo.fechaSalida} Hora: {vuelo.hora}
+                </p>{" "}
+                {/* Mostrar hora */}
                 <p className="text-gray-600">Precio: ${vuelo.costo}</p>
                 <div className="flex space-x-4 mt-4">
                   <button
