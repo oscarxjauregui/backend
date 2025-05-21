@@ -50,7 +50,7 @@ export const MyReservationsProvider = ({ children }) => {
 
   useEffect(() => {
     fetchUserReservations();
-  }, [fetchUserReservations]);
+  }, [isAuthenticated]);
 
   const contextValue = useMemo(
     () => ({

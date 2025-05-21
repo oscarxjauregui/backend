@@ -34,6 +34,22 @@ const vueloSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    piloto: {
+      type: String,
+      required: true,
+    },
+    copiloto: {
+      type: String,
+    },
+    azafata1: {
+      type: String,
+    },
+    azafata2: {
+      type: String,
+    },
+    azafata3: {
+      type: String,
+    },
     estado: {
       type: String,
       required: true,

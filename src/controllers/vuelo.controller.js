@@ -33,11 +33,9 @@ export const getVuelosByDestino = async (req, res) => {
     });
 
     if (vuelos.length === 0) {
-      return res
-        .status(404)
-        .json({
-          message: "No se encontraron vuelos para el destino especificado",
-        });
+      return res.status(404).json({
+        message: "No se encontraron vuelos para el destino especificado",
+      });
     }
     res.json(vuelos);
   } catch (error) {
@@ -56,6 +54,11 @@ export const vueloUpload = async (req, res) => {
     asientosDisponibles,
     avion,
     aerolinea,
+    piloto,
+    copiloto,
+    azafata1,
+    azafata2,
+    azafata3,
     estado,
   } = req.body;
 
@@ -87,6 +90,11 @@ export const vueloUpload = async (req, res) => {
       asientosDisponibles,
       avion,
       aerolinea,
+      piloto,
+      copiloto,
+      azafata1,
+      azafata2,
+      azafata3,
       estado,
     });
 
@@ -172,6 +180,61 @@ export const updateEstadoVuelo = async (req, res) => {
     }
     res.status(500).json({
       message: "Error interno del servidor al actualizar estado del vuelo.",
+    });
+  }
+};
+
+export const updateVuelo = async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "ID de vuelo inválido" });
+  }
+
+  const updateData = { ...req.body };
+  if (req.file) {
+    updateData.imagen = req.file.path; // O req.file.location si usas S3
+  }
+
+  try {
+    const vueloActualizado = await Vuelo.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
+    if (!vueloActualizado) {
+      return res.status(404).json({ message: "Vuelo no encontrado" });
+    }
+    res.status(200).json(vueloActualizado);
+  } catch (error) {
+    console.error(`Error al actualizar vuelo ${id}:`, error);
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((val) => val.message);
+      return res.status(400).json({ message: messages.join(", ") });
+    }
+    res.status(500).json({
+      message: "Error interno del servidor al actualizar el vuelo.",
+    });
+  }
+};
+
+// Eliminar un vuelo
+
+export const deleteVuelo = async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "ID de vuelo inválido" });
+  }
+  try {
+    const vueloEliminado = await Vuelo.findByIdAndDelete(id);
+    if (!vueloEliminado) {
+      return res.status(404).json({ message: "Vuelo no encontrado" });
+    }
+    res.status(200).json({ message: "Vuelo eliminado correctamente" });
+  } catch (error) {
+    console.error(`Error al eliminar vuelo ${id}:`, error);
+    res.status(500).json({
+      message: "Error interno del servidor al eliminar el vuelo.",
     });
   }
 };

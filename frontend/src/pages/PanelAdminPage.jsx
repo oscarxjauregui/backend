@@ -29,7 +29,7 @@ export default function PanelAdmin() {
       icon: (
         <Plane className="w-16 h-16 text-white p-3 bg-indigo-500 rounded-full" />
       ),
-      route: "/admin/vuelosa",
+      route: "/admin/vuelos",
     },
     {
       title: "Usuarios",

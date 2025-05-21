@@ -6,6 +6,8 @@ import {
   updateHorarioVuelo,
   updateEstadoVuelo,
   getVuelosByDestino,
+  updateVuelo,
+  deleteVuelo,
 } from "../controllers/vuelo.controller.js";
 import { authRequired } from "../middlewares/validateToken.js";
 
@@ -22,5 +24,9 @@ router.put("/vuelos/:id/horario", authRequired, updateHorarioVuelo);
 router.put("/vuelos/:id/estado", authRequired, updateEstadoVuelo);
 
 router.get("/vuelos/destino/:destino", getVuelosByDestino);
+
+router.put("/vuelos/:id", authRequired, updateVuelo);
+
+router.delete("/vuelos/:id", authRequired, deleteVuelo);
 
 export default router;

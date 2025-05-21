@@ -357,33 +357,6 @@ function VueloDetailsPage() {
             </section>
 
             {/* Sección Equipaje */}
-            <section>
-              <h2 className="text-xl font-semibold mb-4">Equipaje</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <label className="block">
-                  <span className="text-gray-700">Maletas de mano:</span>
-                  <input
-                    name="equipajeMano"
-                    value={formData.equipajeMano}
-                    onChange={handleInputChange}
-                    type="number"
-                    min="0"
-                    className="mt-1 block w-full p-3 border border-gray-300 rounded-xl"
-                  />
-                </label>
-                <label className="block">
-                  <span className="text-gray-700">Maletas facturadas:</span>
-                  <input
-                    name="equipajeFacturado"
-                    value={formData.equipajeFacturado}
-                    onChange={handleInputChange}
-                    type="number"
-                    min="0"
-                    className="mt-1 block w-full p-3 border border-gray-300 rounded-xl"
-                  />
-                </label>
-              </div>
-            </section>
 
             {/* Sección Datos de Pago */}
             <section>
