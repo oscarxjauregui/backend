@@ -18,9 +18,14 @@ const AdminVuelosPage = () => {
   const [formData, setFormData] = useState({
     origen: "",
     destino: "",
-    fechaSalida: "", // Corregido: si tu campo en el backend es 'fechaSalida'
-    avion: "",
+    fechaSalida: "",
+    fechaLlegada: "",
+    hora: "",
     costo: "",
+    asientosDisponibles: "",
+    avion: "",
+    aerolinea: "",
+    estado: "",
     piloto: "",
     copiloto: "",
     azafata1: "",
@@ -62,32 +67,32 @@ const AdminVuelosPage = () => {
   }, [vuelos, filterDestino, filterFecha]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value, type } = e.target;
+    // Convierte a número si es un campo numérico
+    setFormData({
+      ...formData,
+      [name]: type === "number" ? Number(value) : value,
+    });
   };
-
-  //   const handleImageChange = (e) => {
-  //     const file = e.target.files[0];
-  //     if (file) {
-  //       // Si necesitas enviar el archivo directamente al backend:
-  //       setFormData({ ...formData, imagen: file });
-  //       // Si solo necesitas la URL para mostrarla en el frontend antes de subir:
-  //       // setFormData({ ...formData, imagen: URL.createObjectURL(file) });
-  //     }
-  //   };
 
   const resetForm = () => {
     setFormData({
       origen: "",
       destino: "",
       fechaSalida: "",
-      avion: "",
+      fechaLlegada: "",
+      hora: "",
       costo: "",
+      asientosDisponibles: "",
+      avion: "",
+      aerolinea: "",
+      estado: "",
       piloto: "",
       copiloto: "",
       azafata1: "",
       azafata2: "",
       azafata3: "",
-      //   imagen: null,
+      // imagen: null,
     });
     setEditingVueloId(null);
     setShowModal(false); // Ocultar el modal al resetear el formulario
@@ -104,9 +109,20 @@ const AdminVuelosPage = () => {
       );
       if (confirmUpdate) {
         const dataToUpdate = {};
+        // Solo envía los campos que tienen un valor o que no son nulos/vacíos para la actualización
         for (const key in formData) {
+          // Excluye los campos de personal si no quieres que se envíen si están vacíos
+          // Pero si quieres que se puedan "desasignar" dejando el campo vacío, incluye el ""
           if (formData[key] !== "" && formData[key] !== null) {
             dataToUpdate[key] = formData[key];
+          } else if (
+            ["piloto", "copiloto", "azafata1", "azafata2", "azafata3"].includes(
+              key
+            ) &&
+            formData[key] === ""
+          ) {
+            // Esto permite enviar una cadena vacía para "desasignar" personal
+            dataToUpdate[key] = "";
           }
         }
         res = await updateAdminVuelo(editingVueloId, dataToUpdate);
@@ -145,18 +161,22 @@ const AdminVuelosPage = () => {
   const handleEdit = (vueloToEdit) => {
     setEditingVueloId(vueloToEdit._id || vueloToEdit.id);
     setFormData({
-      origen: vueloToEdit.origen || "", // No requerido para actualizar
-      destino: vueloToEdit.destino || "", // No requerido para actualizar
+      origen: vueloToEdit.origen || "",
+      destino: vueloToEdit.destino || "",
       fechaSalida: vueloToEdit.fechaSalida || "",
-      hora: vueloToEdit.hora || "", // Cargar la hora
+      fechaLlegada: vueloToEdit.fechaLlegada || "",
+      hora: vueloToEdit.hora || "",
       avion: vueloToEdit.avion || "",
       costo: vueloToEdit.costo || "",
+      asientosDisponibles: vueloToEdit.asientosDisponibles || "",
+      aerolinea: vueloToEdit.aerolinea || "",
+      estado: vueloToEdit.estado || "",
       piloto: vueloToEdit.piloto || "",
       copiloto: vueloToEdit.copiloto || "",
       azafata1: vueloToEdit.azafata1 || "",
       azafata2: vueloToEdit.azafata2 || "",
       azafata3: vueloToEdit.azafata3 || "",
-      // imagen: vueloToEdit.imagen || null, // No cargar imagen al editar si no se va a manejar
+      // imagen: vueloToEdit.imagen || null,
     });
     setShowModal(true);
   };
@@ -225,7 +245,9 @@ const AdminVuelosPage = () => {
         {/* Modal para Crear/Editar Vuelo */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-2xl mx-4">
+            <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-2xl mx-4 overflow-y-auto max-h-[90vh]">
+              {" "}
+              {/* Ajustado para scroll si el contenido es muy largo */}
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-semibold text-gray-900">
                   {editingVueloId !== null
@@ -239,15 +261,12 @@ const AdminVuelosPage = () => {
                   &times;
                 </button>
               </div>
-
               <form
                 onSubmit={handleSubmit}
                 className="grid md:grid-cols-2 gap-6"
               >
                 {/* Origen */}
                 <div className="relative">
-                  {" "}
-                  {/* Añadido div para el label */}
                   <label
                     htmlFor="origen"
                     className="absolute -top-3 left-3 bg-white px-1 text-xs text-gray-600"
@@ -256,12 +275,12 @@ const AdminVuelosPage = () => {
                   </label>
                   <input
                     type="text"
-                    id="origen" // Agregado ID para asociar con el label
+                    id="origen"
                     name="origen"
                     placeholder="Origen"
                     value={formData.origen}
                     onChange={handleChange}
-                    // required={!editingVueloId} // Solo requerido para creación
+                    required={!editingVueloId}
                     className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
                   />
                 </div>
@@ -280,7 +299,7 @@ const AdminVuelosPage = () => {
                     placeholder="Destino"
                     value={formData.destino}
                     onChange={handleChange}
-                    // required={!editingVueloId} // Solo requerido para creación
+                    required={!editingVueloId}
                     className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
                   />
                 </div>
@@ -298,7 +317,25 @@ const AdminVuelosPage = () => {
                     name="fechaSalida"
                     value={formData.fechaSalida}
                     onChange={handleChange}
-                    // required={!editingVueloId} // Solo requerido para creación
+                    required={!editingVueloId}
+                    className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
+                  />
+                </div>
+                {/* Fecha Llegada - NUEVO */}
+                <div className="relative">
+                  <label
+                    htmlFor="fechaLlegada"
+                    className="absolute -top-3 left-3 bg-white px-1 text-xs text-gray-600"
+                  >
+                    Fecha de Llegada
+                  </label>
+                  <input
+                    type="date"
+                    id="fechaLlegada"
+                    name="fechaLlegada"
+                    value={formData.fechaLlegada}
+                    onChange={handleChange}
+                    required={!editingVueloId}
                     className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
                   />
                 </div>
@@ -311,12 +348,12 @@ const AdminVuelosPage = () => {
                     Hora de Salida
                   </label>
                   <input
-                    type="time" // Tipo de input para hora
+                    type="time"
                     id="hora"
                     name="hora"
                     value={formData.hora}
                     onChange={handleChange}
-                    // required={!editingVueloId} // Solo requerido para creación
+                    required={!editingVueloId}
                     className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
                   />
                 </div>
@@ -329,13 +366,13 @@ const AdminVuelosPage = () => {
                     Avión
                   </label>
                   <input
-                    type="text" // Cambiado de select a input type="text"
+                    type="text"
                     id="avion"
                     name="avion"
-                    placeholder="Ej: Boeing 747" // Placeholder más apropiado
+                    placeholder="Ej: Boeing 747"
                     value={formData.avion}
                     onChange={handleChange}
-                    required={!editingVueloId} // Mantén si es requerido para la creación
+                    required={!editingVueloId}
                     className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
                   />
                 </div>
@@ -355,10 +392,71 @@ const AdminVuelosPage = () => {
                     placeholder="Costo USD"
                     value={formData.costo}
                     onChange={handleChange}
-                    // required={!editingVueloId} // Solo requerido para creación
+                    required={!editingVueloId}
                     className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
                   />
                 </div>
+                <div className="relative">
+                  <label
+                    htmlFor="asientosDisponibles"
+                    className="absolute -top-3 left-3 bg-white px-1 text-xs text-gray-600"
+                  >
+                    Asientos Disponibles
+                  </label>
+                  <input
+                    type="number"
+                    id="asientosDisponibles"
+                    name="asientosDisponibles"
+                    placeholder="Número de asientos"
+                    value={formData.asientosDisponibles}
+                    onChange={handleChange}
+                    required={!editingVueloId}
+                    className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
+                  />
+                </div>
+
+                <div className="relative">
+                  <label
+                    htmlFor="aerolinea"
+                    className="absolute -top-3 left-3 bg-white px-1 text-xs text-gray-600"
+                  >
+                    Aerolínea
+                  </label>
+                  <input
+                    type="text"
+                    id="aerolinea"
+                    name="aerolinea"
+                    placeholder="Ej: Avianca, Latam"
+                    value={formData.aerolinea}
+                    onChange={handleChange}
+                    required={!editingVueloId}
+                    className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
+                  />
+                </div>
+                <div className="relative">
+                  <label
+                    htmlFor="estado"
+                    className="absolute -top-3 left-3 bg-white px-1 text-xs text-gray-600"
+                  >
+                    Estado del Vuelo
+                  </label>
+                  <select
+                    id="estado"
+                    name="estado"
+                    value={formData.estado}
+                    onChange={handleChange}
+                    required={!editingVueloId}
+                    className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
+                  >
+                    <option value="">Seleccionar Estado</option>
+                    <option value="programado">Programado</option>
+                    <option value="retrasado">Retrasado</option>
+                    <option value="cancelado">Cancelado</option>
+                    <option value="enVuelo">En Vuelo</option>
+                    <option value="aterrizado">Aterrizado</option>
+                  </select>
+                </div>
+
                 {/* Piloto */}
                 <div className="relative">
                   <label
@@ -372,22 +470,14 @@ const AdminVuelosPage = () => {
                     name="piloto"
                     value={formData.piloto}
                     onChange={handleChange}
-                    required={!editingVueloId}
                     className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
                   >
                     <option value="">Seleccionar Piloto</option>
-                    {pilotos.map(
-                      (
-                        piloto // 'piloto' es ahora un objeto de usuario
-                      ) => (
-                        <option key={piloto._id} value={piloto._id}>
-                          {" "}
-                          {/* El value debe ser el ID */}
-                          {`${piloto.nombre} ${piloto.apellido}`}{" "}
-                          {/* Lo que se muestra al usuario */}
-                        </option>
-                      )
-                    )}
+                    {pilotos.map((piloto) => (
+                      <option key={piloto._id} value={piloto._id}>
+                        {`${piloto.nombre} ${piloto.apellido}`}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -402,23 +492,20 @@ const AdminVuelosPage = () => {
                   <select
                     id="copiloto"
                     name="copiloto"
-                    value={formData.copiloto} // formData.copiloto ahora debe almacenar el _id del copiloto
+                    value={formData.copiloto}
                     onChange={handleChange}
                     className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
                   >
                     <option value="">Seleccionar Copiloto</option>
-                    {pilotos.map(
-                      (
-                        copiloto // 'copiloto' es ahora un objeto de usuario
-                      ) => (
-                        <option key={copiloto._id} value={copiloto._id}>
-                          {`${copiloto.nombre} ${copiloto.apellido}`}
-                        </option>
-                      )
-                    )}
+                    {pilotos.map((copiloto) => (
+                      <option key={copiloto._id} value={copiloto._id}>
+                        {`${copiloto.nombre} ${copiloto.apellido}`}
+                      </option>
+                    ))}
                   </select>
                 </div>
-                {/* Azafata 1 */}
+
+                {/* Sección de Azafatas en una fila separada */}
                 <div className="grid md:grid-cols-3 gap-4 col-span-full">
                   {/* Azafata 1 */}
                   <div className="relative">
@@ -434,10 +521,8 @@ const AdminVuelosPage = () => {
                       value={formData.azafata1}
                       onChange={handleChange}
                       className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
-                      // REMOVIDO: No hay 'required' aquí, lo que lo hace opcional
                     >
-                      <option value="">Azafata 1</option>{" "}
-                      {/* Esta opción con value="" es crucial */}
+                      <option value="">Azafata 1</option>
                       {azafatas.map((azafata) => (
                         <option key={azafata._id} value={azafata._id}>
                           {`${azafata.nombre} ${azafata.apellido}`}
@@ -460,7 +545,6 @@ const AdminVuelosPage = () => {
                       value={formData.azafata2}
                       onChange={handleChange}
                       className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
-                      // REMOVIDO: No hay 'required' aquí
                     >
                       <option value="">Azafata 2</option>
                       {azafatas.map((azafata) => (
@@ -485,7 +569,6 @@ const AdminVuelosPage = () => {
                       value={formData.azafata3}
                       onChange={handleChange}
                       className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
-                      // REMOVIDO: No hay 'required' aquí
                     >
                       <option value="">Azafata 3</option>
                       {azafatas.map((azafata) => (
@@ -578,9 +661,14 @@ const AdminVuelosPage = () => {
                 </h3>
                 <p className="text-gray-600">
                   Fecha: {vuelo.fechaSalida} Hora: {vuelo.hora}
-                </p>{" "}
-                {/* Mostrar hora */}
+                </p>
                 <p className="text-gray-600">Precio: ${vuelo.costo}</p>
+                <p className="text-gray-600">
+                  Aerolínea: {vuelo.aerolinea}
+                </p>{" "}
+                {/* Mostrar */}
+                <p className="text-gray-600">Estado: {vuelo.estado}</p>{" "}
+                {/* Mostrar */}
                 <div className="flex space-x-4 mt-4">
                   <button
                     onClick={() => handleEdit(vuelo)}

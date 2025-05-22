@@ -156,7 +156,7 @@ export const getUsersByRole = async (req, res) => {
 
 export const getPilotos = async (req, res) => {
   try {
-    const capitanes = await User.find({ rol: "piloto" }).select("-password"); // Sin '.select()' ni '.map()' para devolver todo menos la contraseña
+    const capitanes = await User.find({ rol: "Piloto" }).select("-password"); // Sin '.select()' ni '.map()' para devolver todo menos la contraseña
     res.status(200).json(capitanes); // Devuelve el array de objetos de usuario completos
   } catch (error) {
     console.error("Error al obtener capitanes:", error);
@@ -169,7 +169,7 @@ export const getPilotos = async (req, res) => {
 // NUEVA FUNCIÓN: Obtener solo las azafatas - Retorna el documento completo
 export const getAzafatas = async (req, res) => {
   try {
-    const azafatas = await User.find({ rol: "azafata" }).select("-password"); // Sin '.select()' ni '.map()' para devolver todo menos la contraseña
+    const azafatas = await User.find({ rol: "Azafata" }).select("-password"); // Sin '.select()' ni '.map()' para devolver todo menos la contraseña
     res.status(200).json(azafatas); // Devuelve el array de objetos de usuario completos
   } catch (error) {
     console.error("Error al obtener azafatas:", error);
