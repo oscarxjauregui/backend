@@ -5,7 +5,7 @@ import { FiChevronRight, FiSearch } from "react-icons/fi";
 import { useVuelos } from "../context/VuelosContext";
 // Importa todas las imágenes necesarias para los destinos
 import cdmxImg from "/images/cdmx.jpg";
-import cancúnImg from "/images/cancún.jpg";
+import cancunImg from "/images/cancun.jpg";
 import monterreyImg from "/images/monterrey.jpg";
 import pueblaImg from "/images/cdmx.jpg";
 import guadalajaraImg from "/images/guadalajara.jpg";
@@ -89,7 +89,7 @@ const Home = () => {
         nombre: "Cancún",
         slug: "cancún",
         precio: "$1,899 MXN",
-        img: cancúnImg,
+        img: cancunImg,
         fecha: "20/06/2025",
         asientos: 18,
         avion: "Boeing 737",

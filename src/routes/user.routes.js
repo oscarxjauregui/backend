@@ -7,6 +7,7 @@ import {
   getUsersByRole,
   getPilotos,
   getAzafatas,
+  userUpload,
 } from "../controllers/users.controller.js";
 import { authRequired } from "../middlewares/validateToken.js";
 import { adminRequired } from "../middlewares/validateAdmin.js";
@@ -31,5 +32,7 @@ router.get(
 router.get("/pilotos", authRequired, getPilotos);
 
 router.get("/azafatas", authRequired, getAzafatas);
+
+router.put("/users/:userId/upload", userUpload);
 
 export default router;

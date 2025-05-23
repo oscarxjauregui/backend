@@ -1,4 +1,4 @@
-// src/context/UserContext.jsx
+// src/context/UsersContext.jsx
 import {
   createContext,
   useContext,
@@ -6,66 +6,121 @@ import {
   useEffect,
   useCallback,
 } from "react";
-import { getCapitanesRequest, getAzafatasRequest } from "../api/users"; // ¡Asegúrate de que la ruta de importación sea '../api/user' y no '../api/users'!
+import {
+  getCapitanesRequest,
+  getAzafatasRequest,
+  getUsersRequest, // NUEVO: Importación para obtener todos los usuarios
+  createUserRequest, // NUEVO: Importación para crear usuarios
+  updateUserRequest, // NUEVO: Importación para actualizar usuarios
+  deleteUserRequest, // NUEVO: Importación para eliminar usuarios
+} from "../api/users"; // Asegúrate de que esta ruta sea correcta
 
-const UserContext = createContext();
+const UsersContext = createContext();
 
 export const useUsers = () => {
-  const context = useContext(UserContext);
+  const context = useContext(UsersContext);
   if (!context) {
-    throw new Error("useUsers must be used within a UserProvider");
+    throw new Error("useUsers debe usarse dentro de un UsersProvider");
   }
   return context;
 };
 
-export const UserProvider = ({ children }) => {
-  // Ahora almacenarán arrays de objetos de usuario completos
+export const UsersProvider = ({ children }) => {
+  const [users, setUsers] = useState([]); // NUEVO: Estado para almacenar todos los usuarios
   const [pilotos, setPilotos] = useState([]);
   const [azafatas, setAzafatas] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [errorUsers, setErrorUsers] = useState(null);
 
-  // Asegúrate de usar useCallback para memoizar la función
-  const loadStaffData = useCallback(async () => {
+  // Función para cargar todos los datos de usuario (incluido el personal)
+  const loadAllUsersData = useCallback(async () => {
     setLoadingUsers(true);
     setErrorUsers(null);
     try {
-      const pilotosRes = await getCapitanesRequest();
-      const azafatasRes = await getAzafatasRequest();
+      const allUsersRes = await getUsersRequest(); // Obtener todos los usuarios
+      setUsers(allUsersRes.data);
 
-      // Guardar los objetos de usuario completos directamente en el estado
-      setPilotos(pilotosRes.data);
-      setAzafatas(azafatasRes.data);
+      // Filtrar pilotos y azafatas de la lista completa para casos de uso específicos
+      setPilotos(allUsersRes.data.filter((user) => user.rol === "Piloto"));
+      setAzafatas(allUsersRes.data.filter((user) => user.rol === "Azafata"));
 
-      console.log("Pilotos cargados (objetos completos):", pilotosRes.data);
-      console.log("Azafatas cargadas (objetos completos):", azafatasRes.data);
+      console.log("Todos los usuarios cargados:", allUsersRes.data);
     } catch (err) {
-      console.error("Error loading staff data:", err);
+      console.error("Error al cargar datos de usuario:", err);
       const errorMessage =
         err.response?.data?.message ||
         err.message ||
-        "Error al cargar el personal (pilotos/azafatas).";
+        "Error al cargar usuarios y personal.";
       setErrorUsers(errorMessage);
     } finally {
       setLoadingUsers(false);
     }
-  }, []); // Dependencias vacías para useCallback para que la función sea estable
+  }, []);
+
+  // NUEVO: Operaciones CRUD para usuarios generales
+  const createUser = async (userData) => {
+    try {
+      const res = await createUserRequest(userData);
+      loadAllUsersData(); // Recargar todos los usuarios para asegurar la consistencia
+      return { success: true, message: "Usuario creado exitosamente" };
+    } catch (err) {
+      console.error("Error al crear usuario:", err);
+      const errorMessage =
+        err.response?.data?.message || "Error al crear usuario";
+      setErrorUsers(errorMessage);
+      return { success: false, message: errorMessage };
+    }
+  };
+
+  const updateUser = async (id, userData) => {
+    try {
+      const res = await updateUserRequest(id, userData);
+      loadAllUsersData(); // Recargar todos los usuarios para asegurar la consistencia
+      return { success: true, message: "Usuario actualizado exitosamente" };
+    } catch (err) {
+      console.error("Error al actualizar usuario:", err);
+      const errorMessage =
+        err.response?.data?.message || "Error al actualizar usuario";
+      setErrorUsers(errorMessage);
+      return { success: false, message: errorMessage };
+    }
+  };
+
+  const deleteUser = async (id) => {
+    try {
+      const res = await deleteUserRequest(id);
+      if (res.status === 200) {
+        loadAllUsersData(); // Recargar todos los usuarios para asegurar la consistencia
+        return { success: true, message: "Usuario eliminado exitosamente" };
+      }
+    } catch (err) {
+      console.error("Error al eliminar usuario:", err);
+      const errorMessage =
+        err.response?.data?.message || "Error al eliminar usuario";
+      setErrorUsers(errorMessage);
+      return { success: false, message: errorMessage };
+    }
+  };
 
   useEffect(() => {
-    loadStaffData();
-  }, [loadStaffData]); // Depende de la función memoizada, que solo cambia si sus propias dependencias internas cambian.
+    loadAllUsersData();
+  }, [loadAllUsersData]);
 
   return (
-    <UserContext.Provider
+    <UsersContext.Provider
       value={{
-        pilotos, // Ahora es un array de objetos de usuario
-        azafatas, // Ahora es un array de objetos de usuario
+        users, // Ahora proporciona todos los usuarios
+        pilotos,
+        azafatas,
         loadingUsers,
         errorUsers,
-        loadStaffData,
+        createUser, // NUEVO
+        updateUser, // NUEVO
+        deleteUser, // NUEVO
+        loadAllUsersData, // Permite que los componentes externos refresquen los datos
       }}
     >
       {children}
-    </UserContext.Provider>
+    </UsersContext.Provider>
   );
 };

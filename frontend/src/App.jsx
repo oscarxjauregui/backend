@@ -5,7 +5,7 @@ import { VuelosByDestinoProvider } from "./context/VuelosByDestinoContext";
 import { VueloProvider } from "./context/VueloByIdContext";
 import { MyReservationsProvider } from "./context/MyReservationsContext";
 import { AdminVuelosProvider } from "./context/AdminVuelosContex";
-import { UserProvider } from "./context/UsersContext";
+import { UsersProvider } from "./context/UsersContext";
 
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
@@ -16,6 +16,7 @@ import VuelosByDestinoPage from "./pages/VuelosByDestinoPage";
 import MyReservations from "./pages/MyReservationsPage";
 import PanelAdminPage from "./pages/PanelAdminPage";
 import AdminVuelosPage from "./pages/AdminVuelosPage";
+import AdminUsuariosPage from "./pages/AdminUsuariosPages";
 
 import ProtectedRoute from "./ProtectedRoute";
 import Navbar from "./components/Navbar";
@@ -30,7 +31,7 @@ function App() {
               <AdminVuelosProvider>
                 {/* Envuelve AdminVuelosProvider y cualquier otro componente que necesite UserContext */}
                 {/* Puedes poner UserProvider más arriba si otros contextos o rutas lo necesitan */}
-                <UserProvider>
+                <UsersProvider>
                   {" "}
                   {/* ¡Añade el UserProvider aquí! */}
                   <BrowserRouter>
@@ -64,11 +65,15 @@ function App() {
                         <Route
                           path="/admin/vuelos"
                           element={<AdminVuelosPage />}
-                        />{" "}
+                        />
+                        <Route
+                          path="/admin/usuarios"
+                          element={<AdminUsuariosPage />}
+                        />
                       </Route>
                     </Routes>
                   </BrowserRouter>
-                </UserProvider>{" "}
+                </UsersProvider>{" "}
                 {/* Cierra el UserProvider aquí */}
               </AdminVuelosProvider>
             </VueloProvider>

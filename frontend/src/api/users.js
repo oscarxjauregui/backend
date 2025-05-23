@@ -1,23 +1,25 @@
-// src/api/user.js
-import axios from "./axios"; // Asegúrate de que este axios sea tu instancia configurada con baseURL
+import axios from "./axios";
 
-// Para obtener solo los nombres de los capitanes (pilotos)
+// Para obtener solo los nombres/datos de los capitanes (pilotos)
 export const getCapitanesRequest = () => {
-  return axios.get(`/pilotos`); // Llama a la ruta '/api/capitanes' en tu backend
+  return axios.get(`/pilotos`);
 };
 
-// Para obtener solo los nombres de las azafatas
+// Para obtener solo los nombres/datos de las azafatas
 export const getAzafatasRequest = () => {
-  return axios.get(`/azafatas`); // Llama a la ruta '/api/azafatas-vuelo' en tu backend
+  return axios.get(`/azafatas`);
 };
 
-// ** Puedes mantener las siguientes funciones si las usas en otras partes de tu frontend **
+// Obtener TODOS los usuarios
+export const getUsersRequest = () => axios.get("/getUsers");
 
-// Si necesitas la función getUsersByRoleRequest para otros propósitos, mantenla
-// export const getUsersByRoleRequest = (role) => axios.get(`/getUsersByRole/${role}`);
+// Crear un nuevo usuario
+export const createUserRequest = (userData) =>
+  axios.post("/createUser", userData);
 
-// Funciones CRUD de usuarios (si las usas en el frontend para gestión general de usuarios)
-export const getUsersRequest = () => axios.get("/users");
-export const createUserRequest = (user) => axios.post("/users", user);
-export const updateUserRequest = (id, user) => axios.put(`/users/${id}`, user);
-export const deleteUserRequest = (id) => axios.delete(`/users/${id}`);
+// Actualizar un usuario existente
+export const updateUserRequest = (id, userData) =>
+  axios.put(`/users/${id}/upload`, userData);
+
+// Eliminar un usuario
+export const deleteUserRequest = (id) => axios.delete(`/deleteUser/${id}`);

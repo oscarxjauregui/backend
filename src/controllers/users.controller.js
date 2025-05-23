@@ -178,3 +178,89 @@ export const getAzafatas = async (req, res) => {
       .json({ message: "Error interno del servidor al obtener azafatas." });
   }
 };
+
+export const userUpload = async (req, res) => {
+  const { userId } = req.params; // ID del usuario a actualizar (viene de la URL)
+  // Datos a actualizar (vienen del cuerpo de la petición)
+  const {
+    nombre,
+    apellido,
+    email,
+    password,
+    telefono,
+    direccion,
+    rol,
+    pasaporte,
+  } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: "ID de usuario inválido." });
+  }
+
+  try {
+    const userToUpdate = await User.findById(userId);
+
+    if (!userToUpdate) {
+      return res.status(404).json({ message: "Usuario no encontrado." });
+    }
+
+    // Actualiza solo los campos que se proporcionan en el cuerpo de la petición
+    // Se usa '!== undefined' para permitir que un campo se actualice a un valor vacío o nulo si se envía explícitamente.
+    if (nombre !== undefined) userToUpdate.nombre = nombre;
+    if (apellido !== undefined) userToUpdate.apellido = apellido;
+    // Si el email cambia, verifica que no esté ya en uso por otro usuario
+    if (email !== undefined && userToUpdate.email !== email) {
+      const existingUserWithEmail = await User.findOne({ email });
+      if (
+        existingUserWithEmail &&
+        String(existingUserWithEmail._id) !== String(userId)
+      ) {
+        return res
+          .status(400)
+          .json({
+            message: "El nuevo email ya está registrado por otro usuario.",
+          });
+      }
+      userToUpdate.email = email;
+    }
+    if (telefono !== undefined) userToUpdate.telefono = telefono;
+    if (direccion !== undefined) userToUpdate.direccion = direccion;
+    if (rol !== undefined) userToUpdate.rol = rol;
+    if (pasaporte !== undefined) userToUpdate.pasaporte = pasaporte; // Asumiendo que 'pasaporte' es un string (ej. una URL externa o texto)
+
+    // Si se proporciona una nueva contraseña, hashearla y actualizarla
+    if (password) {
+      userToUpdate.password = await bcrypt.hash(password, 10);
+    }
+
+    const updatedUser = await userToUpdate.save();
+
+    // Prepara el objeto de respuesta, excluyendo la contraseña
+    const { password: _, ...userWithoutPassword } = updatedUser.toObject();
+
+    res.status(200).json({
+      message: "Datos de usuario actualizados exitosamente",
+      user: userWithoutPassword,
+    });
+  } catch (error) {
+    console.error(`Error al actualizar datos del usuario ${userId}:`, error);
+    // Manejo de errores específicos
+    if (error.code === 11000) {
+      // Error de duplicidad (por ejemplo, si otro campo único causa conflicto)
+      return res.status(409).json({
+        message:
+          "Error al actualizar: Ya existe un registro con este dato (ej. email).",
+      });
+    }
+    if (error.name === "ValidationError") {
+      // Errores de validación del esquema de Mongoose
+      const messages = Object.values(error.errors).map((val) => val.message);
+      return res.status(400).json({ message: messages });
+    }
+    res
+      .status(500)
+      .json({
+        message: "Error interno del servidor al actualizar datos del usuario.",
+      });
+  }
+};

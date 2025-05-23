@@ -45,7 +45,7 @@ function VuelosByDestinoPage() {
       },
       {
         nombre: "Cancún",
-        slug: "cancun",
+        slug: "cancún",
         precio: "$1,899 MXN",
         img: cancunImg,
         fecha: "20/06/2025",
