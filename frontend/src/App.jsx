@@ -17,6 +17,7 @@ import MyReservations from "./pages/MyReservationsPage";
 import PanelAdminPage from "./pages/PanelAdminPage";
 import AdminVuelosPage from "./pages/AdminVuelosPage";
 import AdminUsuariosPage from "./pages/AdminUsuariosPages";
+import AdminStatusPage from "./pages/AdminStatusPage";
 
 import ProtectedRoute from "./ProtectedRoute";
 import Navbar from "./components/Navbar";
@@ -29,11 +30,7 @@ function App() {
           <VuelosByDestinoProvider>
             <VueloProvider>
               <AdminVuelosProvider>
-                {/* Envuelve AdminVuelosProvider y cualquier otro componente que necesite UserContext */}
-                {/* Puedes poner UserProvider más arriba si otros contextos o rutas lo necesitan */}
                 <UsersProvider>
-                  {" "}
-                  {/* ¡Añade el UserProvider aquí! */}
                   <BrowserRouter>
                     <Navbar />
                     <Routes>
@@ -69,6 +66,10 @@ function App() {
                         <Route
                           path="/admin/usuarios"
                           element={<AdminUsuariosPage />}
+                        />
+                        <Route
+                          path="/admin/status" // <-- Define la ruta para el componente AdminStatus
+                          element={<AdminStatusPage />}
                         />
                       </Route>
                     </Routes>
