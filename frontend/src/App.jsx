@@ -6,6 +6,7 @@ import { VueloProvider } from "./context/VueloByIdContext";
 import { MyReservationsProvider } from "./context/MyReservationsContext";
 import { AdminVuelosProvider } from "./context/AdminVuelosContex";
 import { UsersProvider } from "./context/UsersContext";
+import { NominaProvider } from "./context/NominaContext"; // Asegúrate de importar el nuevo contexto
 
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
@@ -18,6 +19,7 @@ import PanelAdminPage from "./pages/PanelAdminPage";
 import AdminVuelosPage from "./pages/AdminVuelosPage";
 import AdminUsuariosPage from "./pages/AdminUsuariosPages";
 import AdminStatusPage from "./pages/AdminStatusPage";
+import NominaPage from "./pages/NominaPage"; // Asegúrate de importar la nueva página
 
 import ProtectedRoute from "./ProtectedRoute";
 import Navbar from "./components/Navbar";
@@ -31,51 +33,58 @@ function App() {
             <VueloProvider>
               <AdminVuelosProvider>
                 <UsersProvider>
-                  <BrowserRouter>
-                    <Navbar />
-                    <Routes>
-                      <Route path="/" element={<HomePage />} />
-                      <Route path="/login" element={<LoginPage />} />
-                      <Route path="/register" element={<RegisterPage />} />
-                      <Route
-                        path="/reservar/:id"
-                        element={<VueloDetailsPage />}
-                      />
-                      <Route
-                        path="/vuelos/:destino"
-                        element={<VuelosByDestinoPage />}
-                      />
+                  <NominaProvider>
+                    <BrowserRouter>
+                      <Navbar />
+                      <Routes>
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/login" element={<LoginPage />} />
+                        <Route path="/register" element={<RegisterPage />} />
+                        <Route
+                          path="/reservar/:id"
+                          element={<VueloDetailsPage />}
+                        />
+                        <Route
+                          path="/vuelos/:destino"
+                          element={<VuelosByDestinoPage />}
+                        />
 
-                      <Route element={<ProtectedRoute />}>
-                        <Route path="/profile" element={<ProfilePage />} />
-                        <Route
-                          path="/myreservations"
-                          element={<MyReservations />}
-                        />
-                      </Route>
+                        <Route element={<ProtectedRoute />}>
+                          <Route path="/profile" element={<ProfilePage />} />
+                          <Route
+                            path="/myreservations"
+                            element={<MyReservations />}
+                          />
+                        </Route>
 
-                      <Route element={<ProtectedRoute requiredRole="admin" />}>
                         <Route
-                          path="/admin/panel"
-                          element={<PanelAdminPage />}
-                        />
-                        <Route
-                          path="/admin/vuelos"
-                          element={<AdminVuelosPage />}
-                        />
-                        <Route
-                          path="/admin/usuarios"
-                          element={<AdminUsuariosPage />}
-                        />
-                        <Route
-                          path="/admin/status" // <-- Define la ruta para el componente AdminStatus
-                          element={<AdminStatusPage />}
-                        />
-                      </Route>
-                    </Routes>
-                  </BrowserRouter>
-                </UsersProvider>{" "}
-                {/* Cierra el UserProvider aquí */}
+                          element={<ProtectedRoute requiredRole="admin" />}
+                        >
+                          <Route
+                            path="/admin/panel"
+                            element={<PanelAdminPage />}
+                          />
+                          <Route
+                            path="/admin/vuelos"
+                            element={<AdminVuelosPage />}
+                          />
+                          <Route
+                            path="/admin/usuarios"
+                            element={<AdminUsuariosPage />}
+                          />
+                          <Route
+                            path="/admin/status"
+                            element={<AdminStatusPage />}
+                          />
+                          <Route
+                            path="/admin/nomina"
+                            element={<NominaPage />}
+                          />
+                        </Route>
+                      </Routes>
+                    </BrowserRouter>
+                  </NominaProvider>
+                </UsersProvider>
               </AdminVuelosProvider>
             </VueloProvider>
           </VuelosByDestinoProvider>
