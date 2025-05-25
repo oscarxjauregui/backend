@@ -9,6 +9,7 @@ import reservacionRoutes from "./routes/reservacion.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import asignacionRoutes from "./routes/asignacion.routes.js";
 import nominaRoutes from "./routes/nomina.routes.js";
+import reportesRoutes from "./routes/reportes.routes.js";
 
 const app = express();
 
@@ -33,5 +34,7 @@ app.use("/api", userRoutes);
 app.use("/api", asignacionRoutes);
 
 app.use("/api", nominaRoutes);
+
+app.use("/api/reportes", reportesRoutes);
 
 export default app;

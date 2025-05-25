@@ -221,7 +221,7 @@ const NominaPage = () => {
           <div className="sm:ml-auto mt-4 sm:mt-0">
             <button
               onClick={generatePdfReport}
-              className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg transition-colors shadow-md"
+              className="bg-black text-white px-5 py-2 rounded-lg hover:bg-gray-800 transition-colors flex items-center"
               disabled={
                 loading ||
                 (nominaPilotos.length === 0 && nominaAzafatas.length === 0)
