@@ -29,3 +29,26 @@ export const getUserReservaciones = async () => {
     throw error.response?.data?.message || "Error al obtener tus reservaciones";
   }
 };
+
+export const getReservationById = async (id) => {
+  try {
+    const res = await api.get(`/reservaciones/${id}`); // Asegúrate de que esta ruta sea correcta para tu backend
+    return res.data;
+  } catch (error) {
+    console.error("Error al obtener la reservación por ID:", error);
+    if (error.response) {
+      throw new Error(
+        error.response.data.message ||
+          "Error del servidor al obtener la reservación."
+      );
+    } else if (error.request) {
+      throw new Error(
+        "No se recibió respuesta del servidor al obtener la reservación."
+      );
+    } else {
+      throw new Error(
+        error.message || "Error desconocido al obtener la reservación."
+      );
+    }
+  }
+};

@@ -1,20 +1,15 @@
-import { useEffect, useCallback } from "react"; // Importa useEffect y useCallback
+import { useEffect, useCallback } from "react";
 import { useMyReservations } from "../context/MyReservationsContext";
 import { Link } from "react-router-dom";
-
-// Opcional: Si tu Navbar no es global, impórtala aquí
-// import Navbar from "../components/Navbar";
 
 function MyReservationsPage() {
   const { reservations, loading, error, fetchUserReservations } =
     useMyReservations();
 
-  // Usa useEffect para cargar las reservaciones cuando el componente se monta
   useEffect(() => {
     fetchUserReservations();
-  }, [fetchUserReservations]); // Dependencia para evitar llamadas infinitas
+  }, [fetchUserReservations]);
 
-  // Función para formatear fechas, reutilizada de las otras páginas
   const formatDate = useCallback((dateString) => {
     if (!dateString) return "N/A";
     try {
@@ -24,14 +19,12 @@ function MyReservationsPage() {
         day: "numeric",
         hour: "2-digit",
         minute: "2-digit",
-        hour12: true, // Formato de 12 horas con AM/PM
+        hour12: true,
       };
 
       let date;
-      // Intenta parsear como fecha ISO primero
       date = new Date(dateString);
 
-      // Si falla y parece ser "DD/MM/YYYY HH:mm"
       if (
         isNaN(date.getTime()) &&
         dateString.includes("/") &&
@@ -39,10 +32,8 @@ function MyReservationsPage() {
       ) {
         const [datePart, timePart] = dateString.split(" ");
         const [day, month, year] = datePart.split("/");
-        // Reconstruye a un formato que `new Date()` pueda parsear mejor (YYYY-MM-DDTHH:mm)
         date = new Date(`${year}-${month}-${day}T${timePart}:00`);
       } else if (isNaN(date.getTime()) && dateString.includes("/")) {
-        // Maneja "DD/MM/YYYY" sin tiempo
         const [day, month, year] = dateString.split("/");
         date = new Date(`${year}-${month}-${day}`);
       }
@@ -57,7 +48,6 @@ function MyReservationsPage() {
     }
   }, []);
 
-  // --- Renderizado para estados de Carga, Error, Vuelo no encontrado ---
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen bg-gray-50 text-gray-900 pt-16 justify-center items-center">
@@ -73,7 +63,7 @@ function MyReservationsPage() {
           Error al cargar reservaciones: {error}
         </p>
         <button
-          onClick={fetchUserReservations} // Permite al usuario reintentar la carga
+          onClick={fetchUserReservations}
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4 transition duration-200"
         >
           Reintentar
@@ -98,25 +88,19 @@ function MyReservationsPage() {
     );
   }
 
-  // --- Renderizado principal de Mis Reservaciones ---
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 text-gray-900 pt-16">
-      {" "}
-      {/* Agregado pt-16 para Navbar fija */}
-      {/* <Navbar /> {/* Descomenta si tu Navbar no es global */}
       <main className="flex-grow container mx-auto px-6 py-8 space-y-6">
         <h1 className="text-3xl font-bold text-center mb-6">
           Mis Reservaciones
         </h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Iteramos sobre TODAS las reservaciones que el usuario tenga */}
           {reservations.map((reservation) => (
             <div
               key={reservation._id}
               className="bg-gray-100 p-6 rounded-2xl shadow-md border border-gray-200 flex flex-col justify-between"
             >
               <div>
-                {/* Aquí mostramos los detalles del vuelo asociado a esta reservación individual */}
                 <h2 className="text-xl font-semibold mb-2 text-gray-900">
                   Vuelo: {reservation.vueloId.origen} -{" "}
                   {reservation.vueloId.destino}
@@ -140,8 +124,6 @@ function MyReservationsPage() {
                   </span>
                 </p>
                 <p className="text-lg font-bold text-emerald-600 mt-2">
-                  {" "}
-                  {/* Ajustado a emerald-600 para contraste */}
                   Costo por asiento: ${" "}
                   {reservation.vueloId.costo
                     ? reservation.vueloId.costo.toFixed(2)
@@ -149,25 +131,25 @@ function MyReservationsPage() {
                   MXN
                 </p>
                 <p className="text-lg font-bold text-emerald-600">
-                  {" "}
-                  {/* Ajustado a emerald-600 */}
-                  Costo Total Reserva: ${" "}
+                  Costo Total Reserva: $
                   {(
                     (reservation.vueloId.costo || 0) * reservation.asientos
-                  ).toFixed(2)}{" "}
+                  ).toFixed(2)}
                   MXN
                 </p>
-                {/* Puedes añadir más detalles del vuelo o de la reservación aquí */}
               </div>
-              {/* Aquí podrías añadir un botón para cancelar la reservación, si ya implementaste esa funcionalidad */}
-              {/* <button className="mt-4 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-200">
-                Cancelar Reserva
-              </button> */}
+              <div className="mt-4">
+                <Link
+                  to={`/myreservations/${reservation._id}/ticket`}
+                  className="block w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition duration-200"
+                >
+                  Ver Ticket
+                </Link>
+              </div>
             </div>
           ))}
         </div>
       </main>
-      {/* Footer (copiado de tu ejemplo de Reservas) */}
       <footer className="bg-gray-900 text-white text-center py-6">
         <p className="text-lg">
           ¿Tienes dudas? Escríbenos a contacto@aerolinea.com

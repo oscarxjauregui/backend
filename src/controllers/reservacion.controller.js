@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Reservacion from "../models/reservacion.model.js";
 import vueloModel from "../models/vuelo.model.js";
+import User from "../models/user.model.js";
 
 export const createReservacion = async (req, res) => {
   try {
@@ -151,5 +152,25 @@ export const cancelReservacion = async (req, res) => {
     res.status(500).json({
       message: "Error interno del servidor al cancelar la reservación",
     });
+  }
+};
+
+export const getReservationById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const reservacion = await Reservacion.findById(id)
+      .populate("vueloId") // <-- ¡CAMBIO AQUÍ!
+      .populate("userId"); // <-- ¡CAMBIO AQUÍ!
+    if (!reservacion) {
+      return res.status(404).json({ message: "Reservación no encontrada." });
+    }
+    res.json(reservacion);
+  } catch (error) {
+    console.error("Error en getReservationById del controlador:", error);
+    return res
+      .status(500)
+      .json({
+        message: "Error al obtener la reservación por ID: " + error.message,
+      });
   }
 };
