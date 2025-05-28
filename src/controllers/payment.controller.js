@@ -1,3 +1,9 @@
+import Stripe from "stripe";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const createSession = async (req, res) => {
   const { name, description, unit_amount, quantity, vueloId, userId } =
@@ -26,7 +32,7 @@ export const createSession = async (req, res) => {
               name: name,
               description: description,
             },
-            currency: "mxn",
+            currency: "USD",
             unit_amount: unit_amount,
           },
           quantity: quantity,

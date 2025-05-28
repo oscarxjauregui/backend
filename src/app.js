@@ -3,6 +3,8 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import Stripe from "stripe";
+import path from "path";
+import { fileURLToPath } from "url";
 
 import authRoutes from "./routes/auth.routes.js";
 import vuelosRoutes from "./routes/vuelos.routes.js";
@@ -27,6 +29,9 @@ app.post("/api/payment/webhook", express.raw({ type: "application/json" }));
 
 app.use(express.json());
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use("/public", express.static(path.join(__dirname, "public")));
 
 app.use("/api", authRoutes);
 

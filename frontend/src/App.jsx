@@ -33,7 +33,6 @@ import ReportesPage from "./pages/ReportesPage";
 import GraficasPage from "./pages/GraficasPage";
 import TicketPage from "./pages/TicketPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
-import VueloStatusPage from "./pages/VueloStatusPage";
 
 import ProtectedRoute from "./ProtectedRoute";
 import Navbar from "./components/Navbar";
@@ -67,11 +66,6 @@ function App() {
                               <Route
                                 path="/vuelos/:destino"
                                 element={<VuelosByDestinoPage />}
-                              />
-
-                              <Route
-                                path="/EstadoVuelos"
-                                element={<VueloStatusPage />}
                               />
 
                               <Route element={<ProtectedRoute />}>

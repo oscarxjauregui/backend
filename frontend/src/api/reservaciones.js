@@ -1,5 +1,23 @@
 import axios from "./axios";
 
+// export const createReservacion = async (vueloId, asientos) => {
+//   try {
+//     const response = await axios.post(`/reservaciones/${vueloId}`, {
+//       asientos,
+//     });
+//     return response.data;
+//   } catch (error) {
+//     console.error(
+//       "Error al crear la reserva:",
+//       error.response?.data || error.message
+//     );
+//     throw (
+//       error.response?.data?.message ||
+//       "Error desconocido al procesar la reserva"
+//     );
+//   }
+// };
+
 export const getUserReservaciones = async () => {
   try {
     const response = await axios.get("/reservaciones");
@@ -52,33 +70,5 @@ export const createReservacionRequest = async (vueloId, data) => {
       error.response?.data?.message ||
       "Error desconocido al procesar la reserva"
     );
-  }
-};
-
-export const cancelReservationRequest = async (reservacionId) => {
-  try {
-    const res = await axios.delete(`/reservaciones/${reservacionId}`); // <--- Llama a la ruta DELETE del backend
-    return res.data;
-  } catch (error) {
-    console.error(
-      `Error en la solicitud de cancelación para ${reservacionId}:`,
-      error
-    );
-    if (error.response) {
-      throw new Error(
-        error.response.data.message ||
-          error.response.data ||
-          "Error del servidor al cancelar la reservación."
-      );
-    } else if (error.request) {
-      throw new Error(
-        "No se recibió respuesta del servidor. Verifica tu conexión."
-      );
-    } else {
-      throw new Error(
-        error.message ||
-          "Error desconocido al intentar cancelar la reservación."
-      );
-    }
   }
 };

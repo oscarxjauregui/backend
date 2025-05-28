@@ -3,13 +3,8 @@ import { useMyReservations } from "../context/MyReservationsContext";
 import { Link } from "react-router-dom";
 
 function MyReservationsPage() {
-  const {
-    reservations,
-    loading,
-    error,
-    fetchUserReservations,
-    cancelReservation,
-  } = useMyReservations(); // <--- Añadimos cancelReservation
+  const { reservations, loading, error, fetchUserReservations } =
+    useMyReservations();
 
   useEffect(() => {
     fetchUserReservations();
@@ -52,29 +47,6 @@ function MyReservationsPage() {
       return "Fecha inválida";
     }
   }, []);
-
-  // Nueva función para manejar la cancelación
-  const handleCancelReservation = async (reservationId) => {
-    if (
-      window.confirm(
-        "¿Estás seguro de que quieres cancelar esta reservación? Esta acción no se puede deshacer."
-      )
-    ) {
-      try {
-        await cancelReservation(reservationId);
-        // Si la cancelación es exitosa, refetch las reservaciones para actualizar la lista
-        alert("Reservación cancelada exitosamente.");
-        fetchUserReservations();
-      } catch (err) {
-        console.error("Error al cancelar la reservación:", err);
-        alert(
-          `Error al cancelar la reservación: ${
-            err.message || "Algo salió mal."
-          }`
-        );
-      }
-    }
-  };
 
   if (loading) {
     return (
@@ -130,40 +102,30 @@ function MyReservationsPage() {
             >
               <div>
                 <h2 className="text-xl font-semibold mb-2 text-gray-900">
-                  Vuelo:{" "}
-                  {reservation.vueloId
-                    ? `${reservation.vueloId.origen} - ${reservation.vueloId.destino}`
-                    : "Vuelo no disponible"}
+                  Vuelo: {reservation.vueloId.origen} -{" "}
+                  {reservation.vueloId.destino}
                 </h2>
                 <p className="text-sm text-gray-700 mb-1">
                   Aerolínea:{" "}
                   <span className="font-medium">
-                    {reservation.vueloId
-                      ? reservation.vueloId.aerolinea
-                      : "N/A"}
+                    {reservation.vueloId.aerolinea}
                   </span>
                 </p>
                 <p className="text-sm text-gray-700 mb-1">
                   Fecha de Salida:{" "}
                   <span className="font-medium">
-                    {reservation.vueloId
-                      ? formatDate(reservation.vueloId.fechaSalida)
-                      : "N/A"}
+                    {formatDate(reservation.vueloId.fechaSalida)}
                   </span>
                 </p>
                 <p className="text-sm text-gray-700 mb-1">
                   Asientos Reservados:{" "}
                   <span className="font-medium text-lg text-blue-600">
-                    {/* Ajuste para manejar si 'asientos' es un número o un array */}
-                    {Array.isArray(reservation.asientos)
-                      ? reservation.asientos.join(", ")
-                      : reservation.asientos}
+                    {reservation.asientos}
                   </span>
                 </p>
                 <p className="text-lg font-bold text-emerald-600 mt-2">
                   Costo por asiento: ${" "}
-                  {reservation.vueloId &&
-                  typeof reservation.vueloId.costo === "number"
+                  {reservation.vueloId.costo
                     ? reservation.vueloId.costo.toFixed(2)
                     : "N/A"}{" "}
                   MXN
@@ -171,47 +133,18 @@ function MyReservationsPage() {
                 <p className="text-lg font-bold text-emerald-600">
                   Costo Total Reserva: $
                   {(
-                    (reservation.vueloId &&
-                    typeof reservation.vueloId.costo === "number"
-                      ? reservation.vueloId.costo
-                      : 0) *
-                    (Array.isArray(reservation.asientos)
-                      ? reservation.asientos.length
-                      : reservation.asientos || 0)
-                  ).toFixed(2)}{" "}
+                    (reservation.vueloId.costo || 0) * reservation.asientos
+                  ).toFixed(2)}
                   MXN
                 </p>
-                <p className="text-sm text-gray-700 mt-1">
-                  Estado:{" "}
-                  <span
-                    className={`font-semibold ${
-                      reservation.estado === "cancelada"
-                        ? "text-red-500"
-                        : "text-green-600"
-                    }`}
-                  >
-                    {reservation.estado}
-                  </span>
-                </p>
               </div>
-              <div className="mt-4 flex flex-col space-y-2">
-                {" "}
-                {/* Contenedor para botones */}
+              <div className="mt-4">
                 <Link
                   to={`/myreservations/${reservation._id}/ticket`}
                   className="block w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition duration-200"
                 >
                   Ver Ticket
                 </Link>
-                {/* Botón de Cancelar, visible solo si la reserva NO está cancelada */}
-                {reservation.estado !== "cancelada" && (
-                  <button
-                    onClick={() => handleCancelReservation(reservation._id)}
-                    className="block w-full text-center bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-200"
-                  >
-                    Cancelar Reservación
-                  </button>
-                )}
               </div>
             </div>
           ))}

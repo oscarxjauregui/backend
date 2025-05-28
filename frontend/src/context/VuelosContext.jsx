@@ -1,11 +1,5 @@
 // src/context/VuelosContext.jsx
-import {
-  createContext,
-  useState,
-  useContext,
-  useEffect,
-  useCallback,
-} from "react"; // <--- Importa useCallback
+import { createContext, useState, useContext, useEffect } from "react";
 import { getVuelosRequest, updateVueloEstadoRequest } from "../api/vuelos";
 
 const VuelosContext = createContext();
@@ -19,13 +13,13 @@ export const useVuelos = () => {
 };
 
 export const VuelosProvider = ({ children }) => {
-  const [vuelos, setVuelos] = useState([]);
+  const [vuelos, setVuelos] = useState([]); // Inicializado como array vacío
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); // --- APLICAR useCallback a fetchVuelos ---
+  const [error, setError] = useState(null);
 
-  const fetchVuelos = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  const fetchVuelos = async () => {
+    setLoading(true); // Inicia carga
+    setError(null); // Limpia errores previos
     console.log("[VuelosContext] Iniciando fetchVuelos...");
 
     try {
@@ -33,6 +27,7 @@ export const VuelosProvider = ({ children }) => {
       console.log("[VuelosContext] Respuesta de getVuelosRequest:", res);
 
       if (res && Array.isArray(res.data)) {
+        // Asegurarse de que res.data es un array
         setVuelos(res.data);
         console.log("[VuelosContext] Vuelos obtenidos y seteados:", res.data);
       } else {
@@ -40,7 +35,7 @@ export const VuelosProvider = ({ children }) => {
           "[VuelosContext] La API no devolvió un array de vuelos o la respuesta fue inesperada.",
           res
         );
-        setVuelos([]);
+        setVuelos([]); // Asegurarse de que sea un array vacío si no es válido
       }
     } catch (err) {
       console.error("[VuelosContext] Error en fetchVuelos:", err);
@@ -49,15 +44,14 @@ export const VuelosProvider = ({ children }) => {
         err.message ||
         "Error al cargar los vuelos";
       setError(errorMessage);
-      setVuelos([]);
+      setVuelos([]); // Asegura que vuelos sea un array vacío en caso de error
     } finally {
-      setLoading(false);
+      setLoading(false); // Finaliza carga
     }
-  }, []); // <--- Dependencias vacías, ya que no depende de nada del scope del provider que cambie
+  };
 
-  const updateVueloStatus = useCallback(async (id, nuevoEstado) => {
-    // <--- También recomendable para esta
-    setError(null);
+  const updateVueloStatus = async (id, nuevoEstado) => {
+    setError(null); // Limpia errores previos de actualización
     try {
       const res = await updateVueloEstadoRequest(id, { estado: nuevoEstado });
       console.log("[VuelosContext] Vuelo actualizado en backend:", res.data);
@@ -78,13 +72,13 @@ export const VuelosProvider = ({ children }) => {
         err.message ||
         "Error al actualizar el estado del vuelo.";
       setError(errorMessage);
-      throw err;
+      throw err; // Propaga el error para manejo en el componente
     }
-  }, []); // <--- Dependencias vacías para updateVueloStatus también
+  };
 
   useEffect(() => {
     fetchVuelos();
-  }, [fetchVuelos]); // Aquí ahora sí, es seguro usar fetchVuelos como dependencia porque está memoizada
+  }, []); // El array vacío asegura que se ejecute solo una vez al montar
 
   return (
     <VuelosContext.Provider
@@ -92,7 +86,7 @@ export const VuelosProvider = ({ children }) => {
         vuelos,
         loading,
         error,
-        fetchVuelos,
+        fetchVuelos, // Para recargar vuelos si es necesario
         updateVueloStatus,
       }}
     >
