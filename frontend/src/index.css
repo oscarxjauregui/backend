@@ -6,3 +6,13 @@ body {
   background: #202020;
   color: white;
 }
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-600;
+  }
+
+  .card {
+    @apply p-4 bg-gray-800 rounded shadow-lg;
+  }
+}
