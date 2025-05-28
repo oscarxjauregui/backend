@@ -37,6 +37,9 @@ const Navbar = () => {
 
         {/* Menú escritorio */}
         <nav className="hidden md:flex items-center space-x-6 text-gray-300 font-medium">
+          <Link to="/EstadoVuelos" className="hover:text-white transition">
+            Estado de vuelos
+          </Link>
           {isAuthenticated ? (
             <>
               {/* Enlaces autenticados */}

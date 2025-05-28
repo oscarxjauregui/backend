@@ -1,12 +1,16 @@
+// src/context/MyReservationsContext.jsx
+
 import {
   createContext,
   useContext,
   useState,
   useEffect,
   useCallback,
-  useMemo,
 } from "react";
-import { getUserReservaciones } from "../api/reservaciones";
+import {
+  getUserReservaciones, // <-- Esta es la función de tu api
+  cancelReservationRequest,
+} from "../api/reservaciones";
 import { useAuth } from "./AuthContext";
 
 const MyReservationsContext = createContext();
@@ -38,10 +42,20 @@ export const MyReservationsProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getUserReservaciones();
-      setReservations(data);
-    } catch (error) {
-      setError(error);
+      // Si getUserReservaciones devuelve directamente el array de reservaciones
+      const userReservationsArray = await getUserReservaciones(); 
+      
+      // Comprueba si el resultado es un array
+      if (Array.isArray(userReservationsArray)) {
+        setReservations(userReservationsArray); // <-- ¡Cambio aquí!
+      } else {
+        console.warn("getUserReservaciones no devolvió un array. Reiniciando a vacío.");
+        setReservations([]);
+      }
+    } catch (err) {
+      console.error("Error fetching user reservations:", err);
+      const errorMessage = err.response?.data?.message || err.message || "Error al cargar tus reservaciones.";
+      setError(errorMessage);
       setReservations([]);
     } finally {
       setLoading(false);
@@ -50,19 +64,38 @@ export const MyReservationsProvider = ({ children }) => {
 
   useEffect(() => {
     fetchUserReservations();
-  }, [isAuthenticated]);
+  }, [fetchUserReservations]); // Ya corregido
 
-  const contextValue = useMemo(
-    () => ({
-      reservations,
-      loading,
-      error,
-      fetchUserReservations,
-    }),
-    [reservations, loading, error, fetchUserReservations]
-  );
+  const cancelReservation = useCallback(async (reservationId) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await cancelReservationRequest(reservationId);
+      fetchUserReservations();
+      return res.data;
+    } catch (err) {
+      console.error(`Error cancelling reservation ${reservationId}:`, err);
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "No se pudo cancelar la reservación.";
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchUserReservations]);
+
   return (
-    <MyReservationsContext.Provider value={contextValue}>
+    <MyReservationsContext.Provider
+      value={{
+        reservations,
+        loading,
+        error,
+        fetchUserReservations,
+        cancelReservation, 
+      }}
+    >
       {children}
     </MyReservationsContext.Provider>
   );

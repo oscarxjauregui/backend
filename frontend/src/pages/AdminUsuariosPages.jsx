@@ -346,7 +346,7 @@ const AdminUsuariosPage = () => {
                   >
                     <option value="">Seleccionar Rol</option>
                     <option value="Cliente">Cliente</option>
-                    <option value="Admin">Admin</option>
+                    <option value="admin">admin</option>
                     <option value="Piloto">Piloto</option>
                     <option value="Azafata">Azafata</option>
                   </select>
@@ -388,7 +388,7 @@ const AdminUsuariosPage = () => {
               >
                 <option value="">Todos los Roles</option>
                 <option value="Cliente">Cliente</option>
-                <option value="Admin">Admin</option>
+                <option value="admin">admin</option>
                 <option value="Piloto">Piloto</option>
                 <option value="Azafata">Azafata</option>
               </select>

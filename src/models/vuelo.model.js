@@ -54,13 +54,6 @@ const vueloSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    reglasEquipaje: {
-      equipajeManoKg: { type: Number, default: 8 },
-      equipajeFacturadoGratis: { type: Number, default: 1 },
-      pesoMaxFacturadoKgPorMaleta: { type: Number, default: 23 },
-      cargoMaletaAdicional: { type: Number, default: 500 },
-      cargoExcesoPesoKg: { type: Number, default: 100 },
-    },
   },
   {
     timestamps: true,
