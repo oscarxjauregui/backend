@@ -1,9 +1,4 @@
-import Stripe from "stripe";
-import dotenv from "dotenv";
 
-dotenv.config();
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const createSession = async (req, res) => {
   const { name, description, unit_amount, quantity, vueloId, userId } =
