@@ -32,6 +32,7 @@ import NominaPage from "./pages/NominaPage";
 import ReportesPage from "./pages/ReportesPage";
 import GraficasPage from "./pages/GraficasPage";
 import TicketPage from "./pages/TicketPage";
+import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 
 import ProtectedRoute from "./ProtectedRoute";
 import Navbar from "./components/Navbar";
@@ -75,6 +76,10 @@ function App() {
                                 <Route
                                   path="/myreservations"
                                   element={<MyReservations />}
+                                />
+                                <Route
+                                  path="/payment-success"
+                                  element={<PaymentSuccessPage />}
                                 />
                                 <Route
                                   path="/myreservations/:id/ticket" // :id será el ID de la reservación

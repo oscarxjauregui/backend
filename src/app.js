@@ -2,6 +2,7 @@ import express from "express";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import Stripe from "stripe";
 
 import authRoutes from "./routes/auth.routes.js";
 import vuelosRoutes from "./routes/vuelos.routes.js";
@@ -21,8 +22,11 @@ app.use(
   })
 );
 app.use(morgan("dev"));
-app.use(express.json());
 app.use(cookieParser());
+app.post("/api/payment/webhook", express.raw({ type: "application/json" }));
+
+app.use(express.json());
+
 
 app.use("/api", authRoutes);
 
@@ -38,6 +42,6 @@ app.use("/api", nominaRoutes);
 
 app.use("/api/reportes", reportesRoutes);
 
-app.use("/api/payment", paymentRoutes);
+app.use("/api", paymentRoutes);
 
 export default app;

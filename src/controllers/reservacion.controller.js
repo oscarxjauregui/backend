@@ -3,76 +3,103 @@ import Reservacion from "../models/reservacion.model.js";
 import vueloModel from "../models/vuelo.model.js";
 import User from "../models/user.model.js";
 
+export const _createReservationLogic = async (vueloId, userId, asientos) => {
+  if (!userId) {
+    throw new Error("No user ID provided. User must be authenticated.");
+  }
+  if (!mongoose.Types.ObjectId.isValid(vueloId)) {
+    throw new Error("ID de vuelo inválido");
+  }
+  // Convertir a número entero y validar. Usamos Number() para asegurar el tipo.
+  const numAsientos = Number(asientos);
+  if (
+    !numAsientos || // Verifica que no sea 0, NaN, null, undefined
+    typeof numAsientos !== "number" ||
+    numAsientos < 1 ||
+    !Number.isInteger(numAsientos)
+  ) {
+    throw new Error(
+      "Número de asientos inválido. Debe ser un número entero positivo."
+    );
+  }
+
+  // --- BUSCA EL VUELO Y DECREMENTA ASIENTOS ---
+  // Aquí es donde corregiremos el "quitar un lugar extra"
+  // El $inc decrementa exactamente la cantidad de 'asientos'.
+  // Si te quita uno extra, asegúrate que 'asientos' tenga el valor correcto (ej. 1, 2, 3...)
+  const vueloActualizado = await vueloModel.findOneAndUpdate(
+    {
+      _id: vueloId,
+      asientosDisponibles: { $gte: numAsientos }, // Asegura que haya suficientes asientos
+    },
+    {
+      $inc: { asientosDisponibles: -numAsientos }, // Decrementa exactamente 'numAsientos'
+    },
+    { new: true } // Devuelve el documento actualizado
+  );
+
+  if (!vueloActualizado) {
+    // Si findOneAndUpdate no encontró un vuelo que cumpliera las condiciones
+    // (o no había suficientes asientos)
+    const vueloExiste = await vueloModel
+      .findById(vueloId)
+      .select("_id asientosDisponibles");
+
+    if (!vueloExiste) {
+      throw new Error("Vuelo no encontrado");
+    } else {
+      throw new Error(
+        `No hay suficientes asientos disponibles en este vuelo. Asientos disponibles: ${vueloExiste.asientosDisponibles}. Intentaste reservar: ${numAsientos}.`
+      );
+    }
+  }
+
+  const nuevaReservacion = new Reservacion({
+    userId: userId,
+    vueloId: vueloId,
+    asientos: asientos,
+    estado: "confirmada", // Asumimos que esta lógica solo se llama para reservas confirmadas
+    fechaReservacion: new Date(),
+  });
+
+  const reservacionGuardada = await nuevaReservacion.save();
+  return reservacionGuardada;
+};
+
 export const createReservacion = async (req, res) => {
   try {
     const { vueloId } = req.params;
-    const { asientos } = req.body;
+    const { asientos } = req.body; // Esto debería ser el número de asientos deseado
     const userId = req.user?.id;
 
-    if (!userId) {
-      return res.status(401).json({
-        message: "No tienes permiso para realizar esta acción. Inicia sesión.",
-      });
-    }
-    if (!mongoose.Types.ObjectId.isValid(vueloId)) {
-      return res.status(400).json({ message: "ID de vuelo inválido" });
-    }
-    if (
-      !asientos ||
-      typeof asientos !== "number" ||
-      asientos < 1 ||
-      !Number.isInteger(asientos)
-    ) {
-      return res.status(400).json({
-        message:
-          "Número de asientos inválido. Debe ser un número entero positivo.",
-      });
-    }
-
-    const vueloActualizado = await vueloModel.findOneAndUpdate(
-      {
-        _id: vueloId,
-        asientosDisponibles: { $gte: asientos },
-      },
-      {
-        $inc: { asientosDisponibles: -asientos },
-      },
-      { new: true }
+    // Llama a la lógica central de reserva
+    const reservacionGuardada = await _createReservationLogic(
+      vueloId,
+      userId,
+      asientos
     );
-
-    if (!vueloActualizado) {
-      const vueloExiste = await vueloModel
-        .findById(vueloId)
-        .select("_id asientosDisponibles");
-
-      if (!vueloExiste) {
-        return res.status(404).json({ message: "Vuelo no encontrado" });
-      } else {
-        return res.status(400).json({
-          message: "No hay suficientes asientos disponibles en este vuelo.",
-        });
-      }
-    }
-
-    const nuevaReservacion = new Reservacion({
-      userId: userId,
-      vueloId: vueloId,
-      asientos: asientos,
-    });
-
-    const reservacionGuardada = await nuevaReservacion.save();
 
     res.status(201).json({
       message: "Reservación creada exitosamente",
       reservacion: reservacionGuardada,
     });
   } catch (error) {
-    console.error("Error al crear la reservación:", error);
+    console.error("Error al crear la reservación:", error.message);
     if (error.code === 11000) {
       return res.status(400).json({
         message:
-          "Error al crear la reservación: Datos duplicados (ej. si intentas reservar el mismo vuelo con el mismo usuario de forma concurrente y hay una restricción única).",
+          "Error al crear la reservación: Datos duplicados (esto no debería ocurrir si no hay restricciones únicas en la combinación userId+vueloId, pero puede ser por stripeSessionId si el webhook se reintenta y no se maneja bien).",
       });
+    }
+    // Para errores de validación lanzados por _createReservationLogic
+    if (
+      error.message.includes("ID de vuelo inválido") ||
+      error.message.includes("Número de asientos inválido") ||
+      error.message.includes("No user ID provided") ||
+      error.message.includes("Vuelo no encontrado") ||
+      error.message.includes("No hay suficientes asientos disponibles")
+    ) {
+      return res.status(400).json({ message: error.message });
     }
     res
       .status(500)
@@ -167,10 +194,8 @@ export const getReservationById = async (req, res) => {
     res.json(reservacion);
   } catch (error) {
     console.error("Error en getReservationById del controlador:", error);
-    return res
-      .status(500)
-      .json({
-        message: "Error al obtener la reservación por ID: " + error.message,
-      });
+    return res.status(500).json({
+      message: "Error al obtener la reservación por ID: " + error.message,
+    });
   }
 };

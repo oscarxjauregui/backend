@@ -1,0 +1,5 @@
+.env
+# otras entradas que ya tengas
+node_modules
+build
+dist

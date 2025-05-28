@@ -1,3 +1,4 @@
+// src/models/reservacion.model.js
 import mongoose from "mongoose";
 
 const reservacionSchema = new mongoose.Schema(
@@ -12,7 +13,20 @@ const reservacionSchema = new mongoose.Schema(
       ref: "Vuelo",
       required: true,
     },
-    asientos: { type: Number, required: true, min: 1 },
+    asientos: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+    estado: {
+      type: String,
+      enum: ["pendiente", "confirmada", "cancelada", "reembolsada"],
+      default: "confirmada",
+    },
+    fechaReservacion: {
+      type: Date,
+      default: Date.now,
+    },
   },
   {
     timestamps: true,
