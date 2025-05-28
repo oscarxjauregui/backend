@@ -6,7 +6,10 @@ import {
   useCallback,
   useMemo,
 } from "react";
-import { getUserReservaciones } from "../api/reservaciones";
+import {
+  getUserReservaciones,
+  cancelReservationRequest,
+} from "../api/reservaciones";
 import { useAuth } from "./AuthContext";
 
 const MyReservationsContext = createContext();
@@ -61,8 +64,41 @@ export const MyReservationsProvider = ({ children }) => {
     }),
     [reservations, loading, error, fetchUserReservations]
   );
+
+  // Nueva función para cancelar una reservación
+  const cancelReservation = useCallback(async (reservationId) => {
+    setLoading(true); // O puedes manejar un loading específico para la cancelación
+    setError(null);
+    try {
+      const res = await cancelReservationRequest(reservationId);
+      // Opcional: Si el backend devuelve la reserva actualizada, puedes actualizar el estado aquí
+      // setReservations(prevReservations => prevReservations.map(
+      //   res => res._id === reservationId ? { ...res, estado: 'cancelada' } : res
+      // ));
+      return res.data; // Devuelve la respuesta del backend
+    } catch (err) {
+      console.error(`Error cancelling reservation ${reservationId}:`, err);
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "No se pudo cancelar la reservación.";
+      setError(errorMessage);
+      throw new Error(errorMessage); // Propagar el error para que MyReservationsPage lo maneje
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   return (
-    <MyReservationsContext.Provider value={contextValue}>
+    <MyReservationsContext.Provider
+      value={{
+        reservations,
+        loading,
+        error,
+        fetchUserReservations,
+        cancelReservation, 
+      }}
+    >
       {children}
     </MyReservationsContext.Provider>
   );

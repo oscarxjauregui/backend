@@ -119,7 +119,7 @@ export const getReservaciones = async (req, res) => {
 
     const reservaciones = await Reservacion.find({ userId: userId })
       .populate("vueloId")
-      .sort({ createdAt: -1 });
+      .populate("userId");
 
     res.status(200).json(reservaciones);
   } catch (error) {
