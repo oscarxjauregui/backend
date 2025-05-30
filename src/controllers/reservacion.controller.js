@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Reservacion from "../models/reservacion.model.js";
 import vueloModel from "../models/vuelo.model.js";
 import User from "../models/user.model.js";
+import { sendEmail } from "../utils/sendEmail.js";
 
 export const _createReservationLogic = async (vueloId, userId, asientos) => {
   if (!userId) {
@@ -78,6 +79,105 @@ export const createReservacion = async (req, res) => {
       userId,
       asientos
     );
+
+    //email
+    try {
+      // 1. Obtener los datos del usuario para el email
+      const user = await User.findById(userId).select("email nombre apellido"); // Selecciona solo los campos necesarios
+      if (!user || !user.email) {
+        console.warn(
+          `Advertencia: No se pudo encontrar el email para el usuario ${userId}. No se enviará correo de confirmación.`
+        );
+        // Puedes decidir si esto es un error fatal o solo una advertencia
+      } else {
+        // 2. Obtener los detalles del vuelo para el email
+        const vuelo = await vueloModel.findById(vueloId);
+        if (!vuelo) {
+          console.warn(
+            `Advertencia: Vuelo ${vueloId} no encontrado para la confirmación de correo.`
+          );
+        }
+
+        const toEmail = user.email;
+        const subject = `Confirmación de tu reserva de vuelo con Vuelazos XD - #${reservacionGuardada._id
+          .toString()
+          .substring(0, 8)}`; // ID corto de reserva
+
+        const textContent = `
+Hola ${user.nombre || "estimado cliente"},
+
+¡Tu reserva ha sido confirmada exitosamente!
+
+Detalles de la Reserva:
+Número de Reserva: ${reservacionGuardada._id}
+Vuelo: ${vuelo ? vuelo.numeroVuelo : "N/A"}
+Origen: ${vuelo ? vuelo.origen : "N/A"}
+Destino: ${vuelo ? vuelo.destino : "N/A"}
+Fecha de Vuelo: ${
+          vuelo ? new Date(vuelo.fechaVuelo).toLocaleDateString() : "N/A"
+        }
+Asientos Reservados: ${reservacionGuardada.asientos}
+Estado: Confirmada
+
+¡Gracias por volar con Vuelazos XD!
+
+Atentamente,
+El equipo de Vuelazos XD
+        `.trim(); // .trim() para quitar espacios extra al inicio/final
+
+        const htmlContent = `
+        <p>Hola <strong>${user.nombre || "estimado cliente"}</strong>,</p>
+        <p>¡Tu reserva ha sido confirmada exitosamente!</p>
+        <p><strong>Detalles de la Reserva:</strong></p>
+        <ul>
+            <li><strong>Número de Reserva:</strong> ${
+              reservacionGuardada._id
+            }</li>
+            <li><strong>Origen:</strong> ${vuelo ? vuelo.origen : "N/A"}</li>
+            <li><strong>Destino:</strong> ${vuelo ? vuelo.destino : "N/A"}</li>
+            <li><strong>Fecha de Vuelo:</strong> ${
+              vuelo
+                ? new Date(vuelo.fechaSalida).toLocaleDateString("es-ES", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                : "N/A"
+            }</li>
+            <li><strong>Asientos Reservados:</strong> ${
+              reservacionGuardada.asientos
+            }</li>
+            <li><strong>Estado:</strong> Confirmada</li>
+        </ul>
+        <p>¡Gracias por volar con <strong>Vuelazos XD</strong>!</p>
+        <p>Atentamente,<br/>El equipo de Vuelazos XD</p>
+        `;
+
+        // 3. Llama a la utilidad de envío de correo
+        const emailResult = await sendEmail(
+          toEmail,
+          subject,
+          textContent,
+          htmlContent
+        );
+
+        if (emailResult.success) {
+          console.log(
+            `Correo de confirmación enviado a ${toEmail} (ID: ${emailResult.messageId})`
+          );
+        } else {
+          console.error(
+            `Fallo al enviar correo de confirmación a ${toEmail}: ${emailResult.error}`
+          );
+        }
+      }
+    } catch (emailError) {
+      console.error(
+        "Error inesperado en la lógica de envío de correo de confirmación:",
+        emailError
+      );
+    }
 
     res.status(201).json({
       message: "Reservación creada exitosamente",

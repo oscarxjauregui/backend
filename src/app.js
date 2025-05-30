@@ -5,6 +5,9 @@ import cors from "cors";
 import Stripe from "stripe";
 import path from "path";
 import { fileURLToPath } from "url";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 import authRoutes from "./routes/auth.routes.js";
 import vuelosRoutes from "./routes/vuelos.routes.js";
@@ -14,6 +17,7 @@ import asignacionRoutes from "./routes/asignacion.routes.js";
 import nominaRoutes from "./routes/nomina.routes.js";
 import reportesRoutes from "./routes/reportes.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
+import sendEmailRoutes from "./routes/sendEmail.routes.js";
 
 const app = express();
 
@@ -48,5 +52,7 @@ app.use("/api", nominaRoutes);
 app.use("/api/reportes", reportesRoutes);
 
 app.use("/api", paymentRoutes);
+
+app.use("/api", sendEmailRoutes);
 
 export default app;

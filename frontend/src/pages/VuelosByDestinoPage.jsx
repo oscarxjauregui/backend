@@ -37,7 +37,7 @@ function VuelosByDestinoPage() {
       {
         nombre: "Ciudad de México",
         slug: "CDMX",
-        precio: "$1,299 MXN",
+        precio: "$1,299 USD",
         img: cdmxImg,
         fecha: "15/06/2025",
         asientos: 25,
@@ -46,7 +46,7 @@ function VuelosByDestinoPage() {
       {
         nombre: "Cancún",
         slug: "cancún",
-        precio: "$1,899 MXN",
+        precio: "$1,899 USD",
         img: cancunImg,
         fecha: "20/06/2025",
         asientos: 18,
@@ -55,7 +55,7 @@ function VuelosByDestinoPage() {
       {
         nombre: "Monterrey",
         slug: "monterrey",
-        precio: "$1,499 MXN",
+        precio: "$1,499 USD",
         img: monterreyImg,
         fecha: "22/06/2025",
         asientos: 30,
@@ -64,7 +64,7 @@ function VuelosByDestinoPage() {
       {
         nombre: "Guadalajara",
         slug: "guadalajara",
-        precio: "$1,399 MXN",
+        precio: "$1,399 USD",
         img: guadalajaraImg,
         fecha: "21/06/2025",
         asientos: 16,
@@ -73,7 +73,7 @@ function VuelosByDestinoPage() {
       {
         nombre: "Puebla",
         slug: "puebla",
-        precio: "$999 MXN",
+        precio: "$999 USD",
         img: pueblaImg,
         fecha: "18/06/2025",
         asientos: 28,
@@ -82,7 +82,7 @@ function VuelosByDestinoPage() {
       {
         nombre: "Veracruz",
         slug: "veracruz",
-        precio: "$1,099 MXN",
+        precio: "$1,099 USD",
         img: veracruzImg,
         fecha: "19/06/2025",
         asientos: 27,
@@ -91,7 +91,7 @@ function VuelosByDestinoPage() {
       {
         nombre: "Tijuana",
         slug: "tijuana",
-        precio: "$1,599 MXN",
+        precio: "$1,599 USD",
         img: tijuanaImg,
         fecha: "23/06/2025",
         asientos: 20,
@@ -302,7 +302,7 @@ function VuelosByDestinoPage() {
                         Fecha de Salida: {formatDate(vuelo.fechaSalida)}
                       </p>
                       <p className="text-blue-600 font-bold text-xl">
-                        Precio: ${vuelo.costo} MXN
+                        Precio: ${vuelo.costo} USD
                       </p>
                     </div>
                     {/* Overlay al pasar el mouse */}
