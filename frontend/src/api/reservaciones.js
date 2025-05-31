@@ -15,7 +15,7 @@ export const getUserReservaciones = async () => {
 
 export const getReservationById = async (id) => {
   try {
-    const res = await axios.get(`/reservaciones/${id}`); // Asegúrate de que esta ruta sea correcta para tu backend
+    const res = await axios.get(`/reservaciones/${id}`);
     return res.data;
   } catch (error) {
     console.error("Error al obtener la reservación por ID:", error);
@@ -37,15 +37,14 @@ export const getReservationById = async (id) => {
 };
 
 export const createReservacionRequest = async (vueloId, data) => {
-  // 'data' DEBE SER UN OBJETO como { asientos: 2 }
-  // console.log para depuración:
+
   console.log(`Enviando POST a /reservaciones/${vueloId} con datos:`, data);
   try {
     const response = await axios.post(`/reservaciones/${vueloId}`, data);
     return response.data;
   } catch (error) {
     console.error(
-      "Error al crear la reserva (createReservacionRequest):", // Mensaje más específico
+      "Error al crear la reserva (createReservacionRequest):",
       error.response?.data || error.message
     );
     throw (
@@ -57,7 +56,7 @@ export const createReservacionRequest = async (vueloId, data) => {
 
 export const cancelReservationRequest = async (reservacionId) => {
   try {
-    const res = await axios.delete(`/reservaciones/${reservacionId}`); // <--- Llama a la ruta DELETE del backend
+    const res = await axios.delete(`/reservaciones/${reservacionId}`);
     return res.data;
   } catch (error) {
     console.error(

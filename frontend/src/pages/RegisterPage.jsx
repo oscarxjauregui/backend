@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { useAuth } from "../context/AuthContext";
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar"; // Asegúrate de que esta ruta sea correcta
+import Navbar from "../components/Navbar";
 
 function RegisterPage() {
   const {
@@ -13,7 +13,6 @@ function RegisterPage() {
   const { signup, isAuthenticated, errors: registerErrors } = useAuth();
   const navigate = useNavigate();
 
-  // Redirigir al usuario a la página principal si ya está autenticado
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/");
@@ -26,17 +25,14 @@ function RegisterPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-blue-50 to-white">
-      {/* Navbar */}
       <Navbar />
 
-      {/* Contenido principal con el formulario de registro */}
       <div className="flex-grow flex items-center justify-center px-6 sm:px-8 lg:px-12 py-12">
         <div className="bg-white p-10 sm:p-12 rounded-lg shadow-xl w-full max-w-lg border border-gray-300">
           <h2 className="text-4xl font-extrabold text-center text-gray-800 mb-6">
             Regístrate
           </h2>
 
-          {/* Mostrar errores del servidor/registro */}
           {registerErrors.length > 0 && (
             <div className="mb-4">
               {registerErrors.map((error, i) => (
@@ -51,7 +47,6 @@ function RegisterPage() {
           )}
 
           <form onSubmit={onSubmit}>
-            {/* Nombre */}
             <div className="mb-4">
               <input
                 type="text"
@@ -68,7 +63,6 @@ function RegisterPage() {
               )}
             </div>
 
-            {/* Apellido */}
             <div className="mb-4">
               <input
                 type="text"
@@ -85,7 +79,6 @@ function RegisterPage() {
               )}
             </div>
 
-            {/* Email */}
             <div className="mb-4">
               <input
                 type="email"
@@ -100,10 +93,9 @@ function RegisterPage() {
               )}
             </div>
 
-            {/* Teléfono */}
             <div className="mb-4">
               <input
-                type="tel" // Usamos type="tel" para teléfonos
+                type="tel" 
                 {...register("telefono", {
                   required: "El teléfono es obligatorio",
                 })}
@@ -117,7 +109,6 @@ function RegisterPage() {
               )}
             </div>
 
-            {/* Dirección */}
             <div className="mb-4">
               <input
                 type="text"
@@ -134,7 +125,6 @@ function RegisterPage() {
               )}
             </div>
 
-            {/* Contraseña */}
             <div className="mb-6">
               <input
                 type="password"
@@ -159,7 +149,6 @@ function RegisterPage() {
             </button>
           </form>
 
-          {/* Enlace para volver al login */}
           <div className="mt-8 text-center text-sm sm:text-base text-gray-600">
             <Link to="/login" className="text-blue-600 hover:underline">
               Ya tengo una cuenta, iniciar sesión
@@ -168,7 +157,6 @@ function RegisterPage() {
         </div>
       </div>
 
-      {/* Footer */}
       <footer className="bg-gray-900 text-white text-center py-6 px-4">
         <p className="text-sm sm:text-base font-medium">
           ¿Tienes dudas? Contáctanos:{" "}

@@ -5,8 +5,6 @@ import {
   useEffect,
   useCallback,
 } from "react";
-// Asegúrate de que estas funciones existan en tu archivo ../api/vuelos
-// Por ejemplo: getVuelosRequest, createVueloRequest, updateVueloRequest, deleteVueloRequest
 import {
   getVuelosRequest,
   createVueloRequest,
@@ -31,14 +29,13 @@ export const AdminVuelosProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 1. Función para obtener todos los vuelos
   const fetchAdminVuelos = useCallback(async () => {
     setLoading(true);
     setError(null);
     console.log("[AdminVuelosContext] Iniciando fetchAdminVuelos...");
 
     try {
-      const res = await getVuelosRequest(); // Asume que esta función obtiene TODOS los vuelos
+      const res = await getVuelosRequest();
 
       if (res && res.data) {
         setVuelos(res.data);
@@ -61,17 +58,16 @@ export const AdminVuelosProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, []); // El array de dependencias vacío asegura que fetchAdminVuelos sea estable.
+  }, []);
 
-  // 2. Función para crear un vuelo
   const createAdminVuelo = useCallback(
     async (vueloData) => {
-      setLoading(true); // Indica que la operación está en curso
+      setLoading(true);
       setError(null);
       try {
         const res = await createVueloRequest(vueloData);
         if (res.status === 201 || res.status === 200) {
-          await fetchAdminVuelos(); // Re-fetch para actualizar la lista después de crear
+          await fetchAdminVuelos();
           return { success: true, message: "Vuelo creado exitosamente." };
         }
         return { success: false, message: "Error al crear el vuelo." };
@@ -86,9 +82,8 @@ export const AdminVuelosProvider = ({ children }) => {
       }
     },
     [fetchAdminVuelos]
-  ); // Depende de fetchAdminVuelos para llamarlo al final
+  );
 
-  // 3. Función para actualizar un vuelo
   const updateAdminVuelo = useCallback(
     async (id, vueloData) => {
       setLoading(true);
@@ -96,7 +91,8 @@ export const AdminVuelosProvider = ({ children }) => {
       try {
         const res = await updateVueloRequest(id, vueloData);
         if (res.status === 200) {
-          await fetchAdminVuelos(); // Re-fetch para actualizar la lista después de actualizar
+          await fetchAdminVuelos();
+
           return { success: true, message: "Vuelo actualizado exitosamente." };
         }
         return { success: false, message: "Error al actualizar el vuelo." };
@@ -115,7 +111,6 @@ export const AdminVuelosProvider = ({ children }) => {
     [fetchAdminVuelos]
   );
 
-  // 4. Función para eliminar un vuelo
   const deleteAdminVuelo = useCallback(
     async (id) => {
       setLoading(true);
@@ -123,8 +118,7 @@ export const AdminVuelosProvider = ({ children }) => {
       try {
         const res = await deleteVueloRequest(id);
         if (res.status === 204 || res.status === 200) {
-          // 204 No Content es común para DELETE exitoso
-          await fetchAdminVuelos(); // Re-fetch para actualizar la lista después de eliminar
+          await fetchAdminVuelos();
           return { success: true, message: "Vuelo eliminado exitosamente." };
         }
         return { success: false, message: "Error al eliminar el vuelo." };
@@ -143,17 +137,15 @@ export const AdminVuelosProvider = ({ children }) => {
     [fetchAdminVuelos]
   );
 
-  // Cargar vuelos al montar el proveedor
   useEffect(() => {
     fetchAdminVuelos();
-  }, [fetchAdminVuelos]); // Se ejecutará una vez al montar y cada vez que fetchAdminVuelos cambie (lo cual no debería ocurrir mucho)
+  }, [fetchAdminVuelos]);
 
-  // El valor del contexto que se expondrá
   const contextValue = {
     vuelos,
     loading,
     error,
-    fetchAdminVuelos, // Para recargar manualmente si es necesario
+    fetchAdminVuelos,
     createAdminVuelo,
     updateAdminVuelo,
     deleteAdminVuelo,

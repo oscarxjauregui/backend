@@ -1,27 +1,25 @@
-// src/pages/VueloDetailsPage.jsx
-import { useEffect, useState, useCallback, useMemo } from "react"; // Importa useMemo
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useVuelo } from "../context/VueloByIdContext";
 import { useAuth } from "../context/AuthContext";
-import { createCheckoutSession } from "../api/payment"; // Importa la función de creación de sesión de pago
+import { createCheckoutSession } from "../api/payment";
+import { createReservacionRequest } from "../api/reservaciones";
 
-// Opcional: Si tu Navbar no es global, impórtala aquí
-// import Navbar from "../components/Navbar";
+import PayPalPaymentButton from "../components/PayPalPaymentButton";
 
 function VueloDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { vuelo, loading, error, fetchVueloById } = useVuelo();
-  const { isAuthenticated, user } = useAuth(); // Obtén el usuario del AuthContext
+  const { isAuthenticated, user } = useAuth();
 
-  // Estado para los datos del formulario de reserva
   const [formData, setFormData] = useState({
     equipajeMano: 0,
     equipajeFacturado: 0,
-    asientos: 1, // Por defecto 1 asiento
-    cardholderName: "", // Nuevo campo para el nombre del titular de la tarjeta
+    asientos: 1,
+    cardholderName: "",
     cardNumber: "",
-    expiryDate: "", // Formato MM/AA
+    expiryDate: "",
     cvv: "",
   });
 
@@ -30,14 +28,16 @@ function VueloDetailsPage() {
   const [reservationSuccess, setReservationSuccess] = useState(false);
   const [formValidationError, setFormValidationError] = useState("");
 
-  // Efecto para obtener los detalles del vuelo cuando el ID cambia
+  const [payPalPaymentSuccess, setPayPalPaymentSuccess] = useState(false);
+  const [payPalPaymentError, setPayPalPaymentError] = useState(null);
+  const [payPalProcessing, setPayPalProcessing] = useState(false);
+
   useEffect(() => {
     if (id) {
       fetchVueloById(id);
     }
   }, [id, fetchVueloById]);
 
-  // Calcula el costo total cuando el vuelo o la cantidad de asientos cambian
   const totalCost = useMemo(() => {
     if (!vuelo || typeof vuelo.costo !== "number") {
       return 0;
@@ -46,11 +46,9 @@ function VueloDetailsPage() {
     if (isNaN(numberOfSeats) || numberOfSeats <= 0) {
       return 0;
     }
-    // Asumiendo que `vuelo.costo` es el costo por asiento
     return vuelo.costo * numberOfSeats;
   }, [vuelo, formData.asientos]);
 
-  // Función para formatear fechas para mostrar
   const formatDate = useCallback((dateString) => {
     if (!dateString) return "N/A";
     try {
@@ -60,14 +58,12 @@ function VueloDetailsPage() {
         day: "numeric",
         hour: "2-digit",
         minute: "2-digit",
-        hour12: true, // Formato de 12 horas con AM/PM
+        hour12: true,
       };
 
       let date;
-      // Intenta parsear como fecha ISO primero
       date = new Date(dateString);
 
-      // Si falla y parece ser "DD/MM/YYYY HH:mm"
       if (
         isNaN(date.getTime()) &&
         dateString.includes("/") &&
@@ -75,10 +71,8 @@ function VueloDetailsPage() {
       ) {
         const [datePart, timePart] = dateString.split(" ");
         const [day, month, year] = datePart.split("/");
-        // Reconstruye a un formato que `new Date()` pueda parsear mejor (YYYY-MM-DDTHH:mm)
         date = new Date(`${year}-${month}-${day}T${timePart}:00`);
       } else if (isNaN(date.getTime()) && dateString.includes("/")) {
-        // Maneja "DD/MM/YYYY" sin tiempo
         const [day, month, year] = dateString.split("/");
         date = new Date(`${year}-${month}-${day}`);
       }
@@ -109,36 +103,7 @@ function VueloDetailsPage() {
     }
   };
 
-  // Función para validar el formulario de reserva
   const validateForm = () => {
-    // NOTA: Con Stripe Checkout, ya no necesitas validar estos campos en el frontend
-    // Esto es porque Stripe maneja la recolección de los datos de la tarjeta en su página.
-    // Solo necesitarías estos si implementas un formulario de pago personalizado con la API de Stripe Elements.
-    // Puedes comentar o eliminar esta parte si solo usas Stripe Checkout por ahora.
-    /*
-    const cardNumberRegex = /^\d{16}$/;
-    const expiryDateRegex = /^(0[1-9]|1[0-2])\/\d{2}$/; // MM/AA
-    const cvvRegex = /^\d{3}$/;
-    if (!formData.cardholderName.trim()) {
-      return "Por favor, ingresa el nombre del titular de la tarjeta.";
-    }
-    if (!cardNumberRegex.test(formData.cardNumber)) {
-      return "El número de tarjeta debe tener 16 dígitos.";
-    }
-    if (!expiryDateRegex.test(formData.expiryDate)) {
-      return "La fecha de vencimiento debe estar en formato MM/AA.";
-    }
-    const [month, year] = formData.expiryDate.split("/").map(Number);
-    const currentYear = new Date().getFullYear() % 100;
-    const currentMonth = new Date().getMonth() + 1;
-    if (year < currentYear || (year === currentYear && month < currentMonth)) {
-      return "La tarjeta ha expirado.";
-    }
-    if (!cvvRegex.test(formData.cvv)) {
-      return "El CVV debe tener 3 dígitos.";
-    }
-    */
-
     const seatsNumber = parseInt(formData.asientos, 10);
     if (seatsNumber <= 0 || isNaN(seatsNumber)) {
       return "El número de asientos debe ser al menos 1.";
@@ -146,29 +111,24 @@ function VueloDetailsPage() {
     if (vuelo && seatsNumber > vuelo.asientosDisponibles) {
       return `Solo hay ${vuelo.asientosDisponibles} asientos disponibles para este vuelo.`;
     }
-
-    return ""; // Retorna string vacío si la validación pasa
+    return "";
   };
 
-  // Manejador para confirmar la reserva
   const handleConfirmReservation = async (e) => {
-    e.preventDefault(); // Evita el envío predeterminado del formulario
+    e.preventDefault();
 
     if (!isAuthenticated) {
-      // Redirige a login, pasando la URL actual y la acción
       navigate(`/login?redirectTo=/reservar/${id}&action=confirmar`);
       return;
     }
 
-    // Realiza la validación del formulario
     const validationError = validateForm();
     if (validationError) {
       setFormValidationError(validationError);
-      setReservationSuccess(false); // Oculta el mensaje de éxito si estaba visible
+      setReservationSuccess(false);
       return;
     }
 
-    // Limpia errores previos y activa el estado de 'reservando'
     setFormValidationError(null);
     setReservationError(null);
     setReservationSuccess(false);
@@ -176,14 +136,14 @@ function VueloDetailsPage() {
 
     try {
       const sessionData = {
-        name: `Vuelo de ${vuelo.origen} a ${vuelo.destino}`, // "De origen a destino"
+        name: `Vuelo de ${vuelo.origen} a ${vuelo.destino}`,
         description: `Salida: ${formatDate(
           vuelo.fechaSalida
-        )} | Llegada: ${formatDate(vuelo.fechaLlegada)}`, // "Fecha de salida y fecha de llegada"
-        unit_amount: Math.round(vuelo.costo * 100), // Costo en centavos (Stripe lo requiere)
-        quantity: formData.asientos, // Número de asientos
-        vueloId: id, // Puedes pasar el ID del vuelo como metadato
-        userId: user ? user.id : null, // Pasa el ID del usuario como metadato si está disponible
+        )} | Llegada: ${formatDate(vuelo.fechaLlegada)}`,
+        unit_amount: Math.round(vuelo.costo * 100),
+        quantity: formData.asientos,
+        vueloId: id,
+        userId: user ? user.id : null,
       };
 
       const response = await createCheckoutSession(sessionData);
@@ -211,7 +171,32 @@ function VueloDetailsPage() {
     }
   };
 
-  // --- Renderizado para estados de Carga, Error, Vuelo no encontrado ---
+  const handlePayPalSuccess = (newReservation) => {
+    console.log(
+      "PayPal payment successful and reservation created:",
+      newReservation
+    );
+    setPayPalPaymentSuccess(true);
+    setPayPalPaymentError(null);
+    setPayPalProcessing(false);
+    navigate("/myreservations?payment=success");
+  };
+
+  const handlePayPalError = (message) => {
+    console.error("PayPal payment error:", message);
+    setPayPalPaymentError(message);
+    setPayPalPaymentSuccess(false);
+    setPayPalProcessing(false);
+  };
+
+  const handlePayPalProcessing = (isProcessing) => {
+    setPayPalProcessing(isProcessing);
+    if (isProcessing) {
+      setPayPalPaymentError(null);
+      setFormValidationError(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="bg-gray-50 text-gray-900 font-sans pt-16 min-h-screen flex justify-center items-center">
@@ -250,13 +235,11 @@ function VueloDetailsPage() {
     );
   }
 
-  // --- Renderizado principal de detalles del vuelo y formulario de reserva ---
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 text-gray-900 pt-16">
       <main className="flex-grow container mx-auto px-6 py-8 space-y-6">
         <h1 className="text-3xl font-bold text-center">Reservar Vuelo</h1>
 
-        {/* Sección de Detalles del Vuelo */}
         <div className="bg-gray-100 p-6 rounded-2xl shadow-md border border-gray-200">
           <h2 className="text-2xl font-semibold mb-4">
             Detalles del Vuelo Seleccionado
@@ -305,13 +288,11 @@ function VueloDetailsPage() {
           </div>
         </div>
 
-        {/* Formulario de Reserva (si no está confirmado) */}
-        {!reservationSuccess ? (
+        {!reservationSuccess && !payPalPaymentSuccess ? (
           <form
             onSubmit={handleConfirmReservation}
             className="bg-gray-100 p-6 rounded-2xl shadow-md border border-gray-200 space-y-6"
           >
-            {/* Sección Datos del Pasajero (solo muestra información) */}
             <section>
               <h2 className="text-xl font-semibold mb-4">Datos del Pasajero</h2>
               {isAuthenticated && user ? (
@@ -325,7 +306,6 @@ function VueloDetailsPage() {
                   <p>
                     <strong>Teléfono:</strong> {user.telefono || "N/A"}
                   </p>{" "}
-                  {/* Añade N/A si no hay datos */}
                   <p>
                     <strong>Pasaporte:</strong> {user.pasaporte || "N/A"}
                   </p>
@@ -344,7 +324,6 @@ function VueloDetailsPage() {
               )}
             </section>
 
-            {/* Sección Número de Asientos */}
             <section>
               <h2 className="text-xl font-semibold mb-4">Número de Asientos</h2>
               <label className="block">
@@ -355,7 +334,7 @@ function VueloDetailsPage() {
                   onChange={handleInputChange}
                   type="number"
                   min="1"
-                  max={vuelo.asientosDisponibles} // Limita al número de asientos disponibles
+                  max={vuelo.asientosDisponibles}
                   placeholder="Cantidad de asientos"
                   className="mt-1 block w-full md:w-1/4 p-3 border border-gray-300 rounded-xl"
                 />
@@ -367,16 +346,12 @@ function VueloDetailsPage() {
               )}
             </section>
 
-            {/* Sección Equipaje */}
-
-            {/* Sección de Costo Total */}
             <div className="text-center border-t border-gray-200 pt-6 mt-6">
               <h2 className="text-2xl font-bold text-blue-600">
                 Total a Pagar: ${totalCost.toFixed(2)} MXN
               </h2>
             </div>
 
-            {/* Mensajes de error y botón de confirmación */}
             {formValidationError && (
               <p className="text-red-600 font-medium text-center">
                 {formValidationError}
@@ -385,6 +360,11 @@ function VueloDetailsPage() {
             {reservationError && (
               <p className="text-red-600 font-medium text-center">
                 {reservationError}
+              </p>
+            )}
+            {payPalPaymentError && (
+              <p className="text-red-600 font-medium text-center">
+                {payPalPaymentError}
               </p>
             )}
 
@@ -397,6 +377,7 @@ function VueloDetailsPage() {
                   className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={
                     reserving ||
+                    payPalProcessing ||
                     !isAuthenticated ||
                     !vuelo ||
                     parseInt(formData.asientos, 10) <= 0 ||
@@ -406,7 +387,7 @@ function VueloDetailsPage() {
                   {reserving
                     ? "Procesando Pago..."
                     : isAuthenticated
-                    ? "Proceder al Pago con Stripe" // Texto más claro para el botón
+                    ? "Proceder al Pago con Stripe"
                     : "Iniciar Sesión para Reservar"}
                 </button>
               ) : (
@@ -419,25 +400,50 @@ function VueloDetailsPage() {
             </div>
             {!isAuthenticated && (
               <p className="text-center text-gray-600 text-sm mt-4">
-                Debes inicWiar sesión para completar la reserva.
+                Debes iniciar sesión para completar la reserva.
               </p>
             )}
+
+            {isAuthenticated && totalCost > 0 && (
+              <div className="flex items-center my-8">
+                <div className="flex-grow border-t border-gray-300"></div>
+                <span className="flex-shrink mx-4 text-gray-500">
+                  O Pagar con PayPal
+                </span>
+                <div className="flex-grow border-t border-gray-300"></div>
+              </div>
+            )}
+
+            {isAuthenticated &&
+              totalCost > 0 &&
+              parseInt(formData.asientos, 10) > 0 &&
+              parseInt(formData.asientos, 10) <= vuelo.asientosDisponibles && (
+                <div className="text-center">
+                  <PayPalPaymentButton
+                    totalAmount={totalCost}
+                    vueloDetails={vuelo}
+                    formData={formData}
+                    userId={user ? user.id : null}
+                    onPaymentSuccess={handlePayPalSuccess}
+                    onPaymentError={handlePayPalError}
+                    onPaymentProcessing={setPayPalProcessing}
+                  />
+                </div>
+              )}
           </form>
         ) : (
-          // Mensaje de éxito de la reserva (esto ya no se activará directamente con el pago de Stripe)
-          // Considera que esta sección ahora debería ser activada por la página payment-success
           <div className="bg-green-100 p-6 rounded-2xl shadow-md border border-green-200 text-center text-green-800">
-            <h2 className="text-2xl font-bold mb-4">¡Pago Redirigido!</h2>
+            <h2 className="text-2xl font-bold mb-4">¡Pago Exitoso!</h2>
             <p className="mt-2">
-              Serás redirigido a la página segura de Stripe para completar tu
-              pago. Por favor, no cierres esta ventana.
+              Tu reserva ha sido confirmada. Revisa tus reservas en la sección
+              "Mis Reservas".
             </p>
             <p className="mt-4">
               <Link
                 to="/myreservations"
                 className="text-blue-600 hover:underline font-medium"
               >
-                (Si la redirección no funciona, haz clic aquí)
+                Ir a Mis Reservas
               </Link>
             </p>
           </div>
@@ -452,7 +458,6 @@ function VueloDetailsPage() {
           </Link>
         </div>
       </main>
-      {/* Footer (copiado de tu ejemplo de Reservas) */}
       <footer className="bg-gray-900 text-white text-center py-6">
         <p className="text-lg">
           ¿Tienes dudas? Escríbenos a contacto@aerolinea.com

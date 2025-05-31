@@ -16,9 +16,7 @@ const Navbar = () => {
   return (
     <header className="bg-gray-900 shadow-md fixed top-0 left-0 right-0 z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between p-4">
-        {/* Contenedor para el Logo y el mensaje de bienvenida */}
         <div className="flex items-center gap-x-4">
-          {/* Logo como enlace a home */}
           <Link
             to="/"
             className="text-2xl font-bold text-white hover:opacity-90"
@@ -27,7 +25,6 @@ const Navbar = () => {
             VUELAZOS XD
           </Link>
 
-          {/* Mensaje de bienvenida (solo si está autenticado) */}
           {isAuthenticated && (
             <span className="text-white text-sm font-medium">
               | Bienvenido {user.nombre}
@@ -35,14 +32,12 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Menú escritorio */}
         <nav className="hidden md:flex items-center space-x-6 text-gray-300 font-medium">
           <Link to="/EstadoVuelos" className="hover:text-white transition">
             Estado de vuelos
           </Link>
           {isAuthenticated ? (
             <>
-              {/* Enlaces autenticados */}
               <Link to="/profile" className="hover:text-white transition">
                 Perfil
               </Link>
@@ -50,7 +45,6 @@ const Navbar = () => {
               {isAdmin ? (
                 <Link to="/admin/panel" className="hover:text-white transition">
                   {" "}
-                  {/* Necesitarás crear esta ruta */}
                   Panel
                 </Link>
               ) : (
@@ -75,7 +69,6 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              {/* Enlaces no autenticados */}
               <Link
                 to="/login"
                 onClick={handleLinkClick}
@@ -94,7 +87,6 @@ const Navbar = () => {
           )}
         </nav>
 
-        {/* Botón móvil */}
         <button
           onClick={() => setOpen(!open)}
           className="md:hidden text-gray-300"
@@ -103,18 +95,15 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Menú móvil (condicional) */}
       {open && (
         <nav className="md:hidden bg-gray-800 border-t border-gray-700 shadow-sm">
           <ul className="flex flex-col px-6 py-4 space-y-3">
             {isAuthenticated ? (
               <>
-                {/* Mensaje de bienvenida en móvil (opcional, puedes quitarlo si solo lo quieres en desktop) */}
                 <li className="flex items-center space-x-3 text-white text-sm">
                   <Plane size={20} className="text-gray-300" />
                   <span>Bienvenido, {user.nombre}</span>
                 </li>
-                {/* Enlaces autenticados en móvil */}
                 <li>
                   <Link
                     to="/profile"
@@ -127,7 +116,7 @@ const Navbar = () => {
                 <li>
                   {isAdmin ? (
                     <Link
-                      to="/admin/panel" // Necesitarás crear esta ruta
+                      to="/admin/panel"
                       className="text-sm text-white"
                       onClick={handleLinkClick}
                     >
@@ -158,7 +147,6 @@ const Navbar = () => {
               </>
             ) : (
               <>
-                {/* Enlaces no autenticados en móvil */}
                 <li className="flex items-center space-x-3">
                   <Plane size={20} className="text-gray-300" />
                   <Link

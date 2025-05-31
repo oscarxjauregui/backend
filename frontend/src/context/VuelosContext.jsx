@@ -1,11 +1,10 @@
-// src/context/VuelosContext.jsx
 import {
   createContext,
   useState,
   useContext,
   useEffect,
   useCallback,
-} from "react"; // <--- Importa useCallback
+} from "react";
 import { getVuelosRequest, updateVueloEstadoRequest } from "../api/vuelos";
 
 const VuelosContext = createContext();
@@ -21,7 +20,7 @@ export const useVuelos = () => {
 export const VuelosProvider = ({ children }) => {
   const [vuelos, setVuelos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); // --- APLICAR useCallback a fetchVuelos ---
+  const [error, setError] = useState(null);
 
   const fetchVuelos = useCallback(async () => {
     setLoading(true);
@@ -53,10 +52,9 @@ export const VuelosProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, []); // <--- Dependencias vacías, ya que no depende de nada del scope del provider que cambie
+  }, []);
 
   const updateVueloStatus = useCallback(async (id, nuevoEstado) => {
-    // <--- También recomendable para esta
     setError(null);
     try {
       const res = await updateVueloEstadoRequest(id, { estado: nuevoEstado });
@@ -80,11 +78,11 @@ export const VuelosProvider = ({ children }) => {
       setError(errorMessage);
       throw err;
     }
-  }, []); // <--- Dependencias vacías para updateVueloStatus también
+  }, []);
 
   useEffect(() => {
     fetchVuelos();
-  }, [fetchVuelos]); // Aquí ahora sí, es seguro usar fetchVuelos como dependencia porque está memoizada
+  }, [fetchVuelos]);
 
   return (
     <VuelosContext.Provider

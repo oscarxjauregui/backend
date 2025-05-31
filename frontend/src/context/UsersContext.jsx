@@ -1,4 +1,3 @@
-// src/context/UsersContext.jsx
 import {
   createContext,
   useContext,
@@ -9,11 +8,11 @@ import {
 import {
   getCapitanesRequest,
   getAzafatasRequest,
-  getUsersRequest, // NUEVO: Importación para obtener todos los usuarios
-  createUserRequest, // NUEVO: Importación para crear usuarios
-  updateUserRequest, // NUEVO: Importación para actualizar usuarios
-  deleteUserRequest, // NUEVO: Importación para eliminar usuarios
-} from "../api/users"; // Asegúrate de que esta ruta sea correcta
+  getUsersRequest,
+  createUserRequest,
+  updateUserRequest,
+  deleteUserRequest,
+} from "../api/users";
 
 const UsersContext = createContext();
 
@@ -26,21 +25,19 @@ export const useUsers = () => {
 };
 
 export const UsersProvider = ({ children }) => {
-  const [users, setUsers] = useState([]); // NUEVO: Estado para almacenar todos los usuarios
+  const [users, setUsers] = useState([]);
   const [pilotos, setPilotos] = useState([]);
   const [azafatas, setAzafatas] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [errorUsers, setErrorUsers] = useState(null);
 
-  // Función para cargar todos los datos de usuario (incluido el personal)
   const loadAllUsersData = useCallback(async () => {
     setLoadingUsers(true);
     setErrorUsers(null);
     try {
-      const allUsersRes = await getUsersRequest(); // Obtener todos los usuarios
+      const allUsersRes = await getUsersRequest();
       setUsers(allUsersRes.data);
 
-      // Filtrar pilotos y azafatas de la lista completa para casos de uso específicos
       setPilotos(allUsersRes.data.filter((user) => user.rol === "Piloto"));
       setAzafatas(allUsersRes.data.filter((user) => user.rol === "Azafata"));
 
@@ -57,11 +54,10 @@ export const UsersProvider = ({ children }) => {
     }
   }, []);
 
-  // NUEVO: Operaciones CRUD para usuarios generales
   const createUser = async (userData) => {
     try {
       const res = await createUserRequest(userData);
-      loadAllUsersData(); // Recargar todos los usuarios para asegurar la consistencia
+      loadAllUsersData();
       return { success: true, message: "Usuario creado exitosamente" };
     } catch (err) {
       console.error("Error al crear usuario:", err);
@@ -75,7 +71,7 @@ export const UsersProvider = ({ children }) => {
   const updateUser = async (id, userData) => {
     try {
       const res = await updateUserRequest(id, userData);
-      loadAllUsersData(); // Recargar todos los usuarios para asegurar la consistencia
+      loadAllUsersData();
       return { success: true, message: "Usuario actualizado exitosamente" };
     } catch (err) {
       console.error("Error al actualizar usuario:", err);
@@ -90,7 +86,7 @@ export const UsersProvider = ({ children }) => {
     try {
       const res = await deleteUserRequest(id);
       if (res.status === 200) {
-        loadAllUsersData(); // Recargar todos los usuarios para asegurar la consistencia
+        loadAllUsersData();
         return { success: true, message: "Usuario eliminado exitosamente" };
       }
     } catch (err) {
@@ -109,15 +105,15 @@ export const UsersProvider = ({ children }) => {
   return (
     <UsersContext.Provider
       value={{
-        users, // Ahora proporciona todos los usuarios
+        users,
         pilotos,
         azafatas,
         loadingUsers,
         errorUsers,
-        createUser, // NUEVO
-        updateUser, // NUEVO
-        deleteUser, // NUEVO
-        loadAllUsersData, // Permite que los componentes externos refresquen los datos
+        createUser,
+        updateUser,
+        deleteUser,
+        loadAllUsersData,
       }}
     >
       {children}

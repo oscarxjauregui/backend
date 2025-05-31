@@ -1,4 +1,3 @@
-// src/pages/PaymentCancelPage.jsx
 import { Link } from "react-router-dom";
 
 function PaymentCancelPage() {

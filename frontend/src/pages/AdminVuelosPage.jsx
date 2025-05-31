@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useAdminVuelos } from "../context/AdminVuelosContex"; // Asegúrate de que la ruta sea correcta
-import { useUsers } from "../context/UsersContext"; // Asegúrate de que la ruta sea correcta
+import { useAdminVuelos } from "../context/AdminVuelosContex";
+import { useUsers } from "../context/UsersContext";
 
 const AdminVuelosPage = () => {
   const {
@@ -31,34 +31,27 @@ const AdminVuelosPage = () => {
     azafata1: "",
     azafata2: "",
     azafata3: "",
-    //    imagen: null,
   });
 
   const [editingVueloId, setEditingVueloId] = useState(null);
-  const [showModal, setShowModal] = useState(false); // Nuevo estado para controlar la visibilidad del modal
+  const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState(null);
 
-  // Estados para los filtros
   const [filterDestino, setFilterDestino] = useState("");
   const [filterFecha, setFilterFecha] = useState("");
   const [filteredVuelos, setFilteredVuelos] = useState([]);
 
-  // Efecto para filtrar vuelos cada vez que cambian los filtros o la lista de vuelos
   useEffect(() => {
     let currentFilteredVuelos = vuelos;
 
-    // Filtro por destino
     if (filterDestino) {
       currentFilteredVuelos = currentFilteredVuelos.filter((vuelo) =>
         vuelo.destino.toLowerCase().includes(filterDestino.toLowerCase())
       );
     }
 
-    // Filtro por fecha
     if (filterFecha) {
       currentFilteredVuelos = currentFilteredVuelos.filter((vuelo) => {
-        // Asegúrate de que los formatos de fecha coincidan o se conviertan
-        // Aquí asumimos que vuelo.fechaSalida es una cadena 'YYYY-MM-DD'
         return vuelo.fechaSalida === filterFecha;
       });
     }
@@ -68,7 +61,6 @@ const AdminVuelosPage = () => {
 
   const handleChange = (e) => {
     const { name, value, type } = e.target;
-    // Convierte a número si es un campo numérico
     setFormData({
       ...formData,
       [name]: type === "number" ? Number(value) : value,
@@ -92,10 +84,9 @@ const AdminVuelosPage = () => {
       azafata1: "",
       azafata2: "",
       azafata3: "",
-      // imagen: null,
     });
     setEditingVueloId(null);
-    setShowModal(false); // Ocultar el modal al resetear el formulario
+    setShowModal(false);
   };
 
   const handleSubmit = async (e) => {
@@ -109,10 +100,7 @@ const AdminVuelosPage = () => {
       );
       if (confirmUpdate) {
         const dataToUpdate = {};
-        // Solo envía los campos que tienen un valor o que no son nulos/vacíos para la actualización
         for (const key in formData) {
-          // Excluye los campos de personal si no quieres que se envíen si están vacíos
-          // Pero si quieres que se puedan "desasignar" dejando el campo vacío, incluye el ""
           if (formData[key] !== "" && formData[key] !== null) {
             dataToUpdate[key] = formData[key];
           } else if (
@@ -121,7 +109,6 @@ const AdminVuelosPage = () => {
             ) &&
             formData[key] === ""
           ) {
-            // Esto permite enviar una cadena vacía para "desasignar" personal
             dataToUpdate[key] = "";
           }
         }
@@ -150,7 +137,7 @@ const AdminVuelosPage = () => {
       if (res && res.success) {
         setMessage({ type: "success", text: res.message });
         if (editingVueloId === id) {
-          resetForm(); // Esto también cerrará el modal si estaba abierto para este vuelo
+          resetForm();
         }
       } else if (res && res.message) {
         setMessage({ type: "error", text: res.message });
@@ -176,17 +163,14 @@ const AdminVuelosPage = () => {
       azafata1: vueloToEdit.azafata1 || "",
       azafata2: vueloToEdit.azafata2 || "",
       azafata3: vueloToEdit.azafata3 || "",
-      // imagen: vueloToEdit.imagen || null,
     });
     setShowModal(true);
   };
 
-  // Manejo de mensajes de error/éxito del contexto
   useEffect(() => {
     if (error) {
       setMessage({ type: "error", text: error });
     }
-    // También maneja errores del contexto de usuarios
     if (errorUsers) {
       setMessage({ type: "error", text: errorUsers });
     }
@@ -202,7 +186,6 @@ const AdminVuelosPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navbar de administrador */}
       <header className="bg-gray-900 text-white p-4">
         <div className="container mx-auto flex justify-between items-center">
           <Link to="/homea" className="text-2xl font-bold hover:text-gray-400">
@@ -217,7 +200,6 @@ const AdminVuelosPage = () => {
           Gestión de Vuelos
         </h1>
 
-        {/* Mensajes de notificación */}
         {message && (
           <div
             className={`p-4 mb-4 rounded-md ${
@@ -231,7 +213,6 @@ const AdminVuelosPage = () => {
           </div>
         )}
 
-        {/* Botón para abrir el modal de creación */}
         <button
           onClick={() => {
             resetForm();
@@ -242,12 +223,9 @@ const AdminVuelosPage = () => {
           Crear Nuevo Vuelo
         </button>
 
-        {/* Modal para Crear/Editar Vuelo */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-2xl mx-4 overflow-y-auto max-h-[90vh]">
-              {" "}
-              {/* Ajustado para scroll si el contenido es muy largo */}
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-semibold text-gray-900">
                   {editingVueloId !== null
@@ -265,7 +243,6 @@ const AdminVuelosPage = () => {
                 onSubmit={handleSubmit}
                 className="grid md:grid-cols-2 gap-6"
               >
-                {/* Origen */}
                 <div className="relative">
                   <label
                     htmlFor="origen"
@@ -284,7 +261,6 @@ const AdminVuelosPage = () => {
                     className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
                   />
                 </div>
-                {/* Destino */}
                 <div className="relative">
                   <label
                     htmlFor="destino"
@@ -303,7 +279,6 @@ const AdminVuelosPage = () => {
                     className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
                   />
                 </div>
-                {/* Fecha Salida */}
                 <div className="relative">
                   <label
                     htmlFor="fechaSalida"
@@ -321,7 +296,6 @@ const AdminVuelosPage = () => {
                     className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
                   />
                 </div>
-                {/* Fecha Llegada - NUEVO */}
                 <div className="relative">
                   <label
                     htmlFor="fechaLlegada"
@@ -339,7 +313,6 @@ const AdminVuelosPage = () => {
                     className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
                   />
                 </div>
-                {/* Hora */}
                 <div className="relative">
                   <label
                     htmlFor="hora"
@@ -357,7 +330,6 @@ const AdminVuelosPage = () => {
                     className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
                   />
                 </div>
-                {/* Avión */}
                 <div className="relative">
                   <label
                     htmlFor="avion"
@@ -377,7 +349,6 @@ const AdminVuelosPage = () => {
                   />
                 </div>
 
-                {/* Costo */}
                 <div className="relative">
                   <label
                     htmlFor="costo"
@@ -457,7 +428,6 @@ const AdminVuelosPage = () => {
                   </select>
                 </div>
 
-                {/* Piloto */}
                 <div className="relative">
                   <label
                     htmlFor="piloto"
@@ -481,7 +451,6 @@ const AdminVuelosPage = () => {
                   </select>
                 </div>
 
-                {/* Copiloto */}
                 <div className="relative">
                   <label
                     htmlFor="copiloto"
@@ -505,9 +474,7 @@ const AdminVuelosPage = () => {
                   </select>
                 </div>
 
-                {/* Sección de Azafatas en una fila separada */}
                 <div className="grid md:grid-cols-3 gap-4 col-span-full">
-                  {/* Azafata 1 */}
                   <div className="relative">
                     <label
                       htmlFor="azafata1"
@@ -531,7 +498,6 @@ const AdminVuelosPage = () => {
                     </select>
                   </div>
 
-                  {/* Azafata 2 */}
                   <div className="relative">
                     <label
                       htmlFor="azafata2"
@@ -555,7 +521,6 @@ const AdminVuelosPage = () => {
                     </select>
                   </div>
 
-                  {/* Azafata 3 */}
                   <div className="relative">
                     <label
                       htmlFor="azafata3"
@@ -580,7 +545,6 @@ const AdminVuelosPage = () => {
                   </div>
                 </div>
 
-                {/* Botón de Submit */}
                 <button
                   type="submit"
                   className="bg-black hover:bg-gray-800 text-white py-4 rounded-md mt-6 w-full col-span-full"
@@ -594,13 +558,11 @@ const AdminVuelosPage = () => {
           </div>
         )}
 
-        {/* Sección de Filtros */}
         <div className="bg-white p-6 rounded-lg shadow-md mb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             Filtros de Vuelos
           </h2>
           <div className="grid md:grid-cols-2 gap-4">
-            {/* Filtro por Destino */}
             <div className="relative">
               <label
                 htmlFor="filterDestino"
@@ -617,7 +579,6 @@ const AdminVuelosPage = () => {
                 className="p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
               />
             </div>
-            {/* Filtro por Fecha */}
             <div className="relative">
               <label
                 htmlFor="filterFecha"
@@ -637,7 +598,6 @@ const AdminVuelosPage = () => {
           </div>
         </div>
 
-        {/* Lista de vuelos */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredVuelos.length === 0 && !loading ? (
             <p className="text-gray-600 text-center col-span-full">
@@ -666,9 +626,7 @@ const AdminVuelosPage = () => {
                 <p className="text-gray-600">
                   Aerolínea: {vuelo.aerolinea}
                 </p>{" "}
-                {/* Mostrar */}
                 <p className="text-gray-600">Estado: {vuelo.estado}</p>{" "}
-                {/* Mostrar */}
                 <div className="flex space-x-4 mt-4">
                   <button
                     onClick={() => handleEdit(vuelo)}

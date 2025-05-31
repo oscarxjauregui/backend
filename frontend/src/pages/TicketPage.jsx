@@ -1,4 +1,3 @@
-// src/pages/TicketPage.jsx
 import { useEffect, useRef, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useTicket } from "../context/TicketContext";
@@ -127,8 +126,6 @@ const TicketPage = () => {
       </div>
     );
   }
-
-  // Datos para el QR Code
   const qrData = JSON.stringify({
     resId: ticketData._id,
     user: `${ticketData.userId.nombre} ${ticketData.userId.apellido}`,
@@ -210,7 +207,6 @@ const TicketPage = () => {
                 </p>
               </div>
             </div>
-            {/* Detalles del Pasajero */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4 mb-8 pt-4 border-t-2 border-gray-200 border-dashed">
               <div>
                 <p className="text-xs uppercase text-gray-500">Pasajero</p>
@@ -276,7 +272,6 @@ const TicketPage = () => {
         </button>
       </div>
 
-      {/* Footer */}
       <footer className="bg-gray-900 text-white text-center py-6">
         <p className="text-lg">
           ¿Tienes dudas? Escríbenos a contacto@aerolinea.com

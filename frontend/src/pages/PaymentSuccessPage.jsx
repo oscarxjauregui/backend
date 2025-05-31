@@ -75,8 +75,6 @@ const PaymentSuccessPage = () => {
             "createReservation - Llamando a la API para crear reserva..."
           );
           const res = await createReservacionRequest(vueloId, { asientos });
-
-          // --- DEPURACIÓN: QUÉ VALORES TIENE 'res' REALMENTE ---
           console.log(
             "Respuesta de createReservacionRequest - res.status:",
             res.status
@@ -87,13 +85,10 @@ const PaymentSuccessPage = () => {
           );
 
           if (res.status >= 200 && res.status < 300) {
-            // Un rango más general de éxito para Axios (200-299)
             setMessage("¡Tu reserva ha sido creada exitosamente!");
             setReservationStatus("success");
             console.log("Reserva creada con éxito (dentro de if):", res.data);
           } else {
-            // Este bloque solo debería alcanzarse si el servidor envía un 2xx pero no un 201 (raro)
-            // o si res.status no es un número (lo cual sería un error de Axios)
             setMessage(
               `Error inesperado al crear la reserva: ${
                 res.data?.message || "Error desconocido"
@@ -117,7 +112,6 @@ const PaymentSuccessPage = () => {
           setMessage(`Error al crear la reserva: ${errorMessage}`);
           setReservationStatus("failed");
         } finally {
-          // El setTimeout para la navegación sigue aquí
           const timer = setTimeout(() => {
             navigate("/myreservations");
           }, 100);

@@ -1,6 +1,5 @@
-// backend/src/routes/sendEmail.routes.js
 import { Router } from "express";
-import { enviarMail } from "../controllers/sendEmail.controller.js"; // Importa la función 'enviarMail' como un named export
+import { enviarMail } from "../controllers/sendEmail.controller.js"; 
 
 const router = Router();
 

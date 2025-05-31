@@ -11,10 +11,9 @@ export const _createReservationLogic = async (vueloId, userId, asientos) => {
   if (!mongoose.Types.ObjectId.isValid(vueloId)) {
     throw new Error("ID de vuelo inválido");
   }
-  // Convertir a número entero y validar. Usamos Number() para asegurar el tipo.
   const numAsientos = Number(asientos);
   if (
-    !numAsientos || // Verifica que no sea 0, NaN, null, undefined
+    !numAsientos || 
     typeof numAsientos !== "number" ||
     numAsientos < 1 ||
     !Number.isInteger(numAsientos)
@@ -24,24 +23,19 @@ export const _createReservationLogic = async (vueloId, userId, asientos) => {
     );
   }
 
-  // --- BUSCA EL VUELO Y DECREMENTA ASIENTOS ---
-  // Aquí es donde corregiremos el "quitar un lugar extra"
-  // El $inc decrementa exactamente la cantidad de 'asientos'.
-  // Si te quita uno extra, asegúrate que 'asientos' tenga el valor correcto (ej. 1, 2, 3...)
   const vueloActualizado = await vueloModel.findOneAndUpdate(
     {
       _id: vueloId,
-      asientosDisponibles: { $gte: numAsientos }, // Asegura que haya suficientes asientos
+      asientosDisponibles: { $gte: numAsientos }, 
     },
     {
-      $inc: { asientosDisponibles: -numAsientos }, // Decrementa exactamente 'numAsientos'
+      $inc: { asientosDisponibles: -numAsientos }, 
     },
-    { new: true } // Devuelve el documento actualizado
+    { new: true } 
   );
 
   if (!vueloActualizado) {
-    // Si findOneAndUpdate no encontró un vuelo que cumpliera las condiciones
-    // (o no había suficientes asientos)
+
     const vueloExiste = await vueloModel
       .findById(vueloId)
       .select("_id asientosDisponibles");
@@ -59,7 +53,7 @@ export const _createReservationLogic = async (vueloId, userId, asientos) => {
     userId: userId,
     vueloId: vueloId,
     asientos: asientos,
-    estado: "confirmada", // Asumimos que esta lógica solo se llama para reservas confirmadas
+    estado: "confirmada",
     fechaReservacion: new Date(),
   });
 
@@ -70,10 +64,9 @@ export const _createReservationLogic = async (vueloId, userId, asientos) => {
 export const createReservacion = async (req, res) => {
   try {
     const { vueloId } = req.params;
-    const { asientos } = req.body; // Esto debería ser el número de asientos deseado
+    const { asientos } = req.body;
     const userId = req.user?.id;
 
-    // Llama a la lógica central de reserva
     const reservacionGuardada = await _createReservationLogic(
       vueloId,
       userId,
@@ -82,15 +75,12 @@ export const createReservacion = async (req, res) => {
 
     //email
     try {
-      // 1. Obtener los datos del usuario para el email
-      const user = await User.findById(userId).select("email nombre apellido"); // Selecciona solo los campos necesarios
+      const user = await User.findById(userId).select("email nombre apellido"); 
       if (!user || !user.email) {
         console.warn(
           `Advertencia: No se pudo encontrar el email para el usuario ${userId}. No se enviará correo de confirmación.`
         );
-        // Puedes decidir si esto es un error fatal o solo una advertencia
       } else {
-        // 2. Obtener los detalles del vuelo para el email
         const vuelo = await vueloModel.findById(vueloId);
         if (!vuelo) {
           console.warn(
@@ -101,7 +91,7 @@ export const createReservacion = async (req, res) => {
         const toEmail = user.email;
         const subject = `Confirmación de tu reserva de vuelo con Vuelazos XD - #${reservacionGuardada._id
           .toString()
-          .substring(0, 8)}`; // ID corto de reserva
+          .substring(0, 8)}`; 
 
         const textContent = `
 Hola ${user.nombre || "estimado cliente"},
@@ -123,7 +113,7 @@ Estado: Confirmada
 
 Atentamente,
 El equipo de Vuelazos XD
-        `.trim(); // .trim() para quitar espacios extra al inicio/final
+        `.trim(); 
 
         const htmlContent = `
         <p>Hola <strong>${user.nombre || "estimado cliente"}</strong>,</p>
@@ -154,7 +144,6 @@ El equipo de Vuelazos XD
         <p>Atentamente,<br/>El equipo de Vuelazos XD</p>
         `;
 
-        // 3. Llama a la utilidad de envío de correo
         const emailResult = await sendEmail(
           toEmail,
           subject,
@@ -191,7 +180,6 @@ El equipo de Vuelazos XD
           "Error al crear la reservación: Datos duplicados (esto no debería ocurrir si no hay restricciones únicas en la combinación userId+vueloId, pero puede ser por stripeSessionId si el webhook se reintenta y no se maneja bien).",
       });
     }
-    // Para errores de validación lanzados por _createReservationLogic
     if (
       error.message.includes("ID de vuelo inválido") ||
       error.message.includes("Número de asientos inválido") ||
@@ -217,17 +205,15 @@ export const getReservaciones = async (req, res) => {
       });
     }
 
-    // 1. Encuentra las reservaciones del usuario y popula el vuelo
     const reservacionesConVuelo = await Reservacion.find({ userId: userId })
       .populate("vueloId")
-      .populate("userId"); // Opcional si no necesitas los detalles completos del usuario
+      .populate("userId");
 
-    // 2. Filtra las reservaciones donde vueloId es null (es decir, el vuelo asociado fue eliminado)
     const reservacionesValidas = reservacionesConVuelo.filter(
       (reservacion) => reservacion.vueloId !== null
     );
 
-    res.status(200).json(reservacionesValidas); // Envía solo las reservaciones válidas
+    res.status(200).json(reservacionesValidas);
   } catch (error) {
     console.error("Error al obtener las reservaciones:", error);
     res.status(500).json({
@@ -292,8 +278,8 @@ export const getReservationById = async (req, res) => {
   try {
     const { id } = req.params;
     const reservacion = await Reservacion.findById(id)
-      .populate("vueloId") // <-- ¡CAMBIO AQUÍ!
-      .populate("userId"); // <-- ¡CAMBIO AQUÍ!
+      .populate("vueloId") 
+      .populate("userId"); 
     if (!reservacion) {
       return res.status(404).json({ message: "Reservación no encontrada." });
     }

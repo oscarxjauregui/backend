@@ -12,12 +12,12 @@ function LoginPage() {
   const { signin, isAuthenticated, errors: signinErrors } = useAuth();
   const navigate = useNavigate();
 
-  // Redirigir al usuario a la página principal si ya está autenticado
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/");
     }
-  }, [isAuthenticated, navigate]); // Dependencias del efecto para que se ejecute cuando cambien
+  }, [isAuthenticated, navigate]); 
+  
 
   const onSubmit = handleSubmit((data) => {
     signin(data);
@@ -25,7 +25,6 @@ function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* Contenedor principal del formulario */}
       <div className="flex-grow flex items-center justify-center px-6 sm:px-8 lg:px-12 py-20">
         <div className="bg-white p-10 sm:p-12 rounded-lg shadow-xl w-full max-w-lg">
           <h2 className="text-4xl font-bold text-center text-gray-800 mb-6">
@@ -35,7 +34,6 @@ function LoginPage() {
             Inicia sesión para continuar tu viaje con nosotros.
           </p>
 
-          {/* Mostrar errores del servidor/autenticación */}
           {signinErrors.length > 0 && (
             <div className="mb-4">
               {signinErrors.map((error, i) => (
@@ -88,17 +86,10 @@ function LoginPage() {
             </button>
           </form>
 
-          {/* Enlaces adicionales */}
           <div className="mt-8 text-center text-sm sm:text-base text-gray-600">
-            {/* Si tienes una ruta para "olvidar contraseña", descomenta esta línea */}
-            {/* <Link
-              to="/forgot-password"
-              className="text-blue-600 hover:underline block mb-4"
-            >
-              ¿Olvidaste tu contraseña?
-            </Link> */}
+    
             <span>
-              ¿No tienes cuenta?{" "}
+              ¿No tienes cuenta?
               <Link to="/register" className="text-blue-600 hover:underline">
                 Regístrate
               </Link>
@@ -107,13 +98,11 @@ function LoginPage() {
         </div>
       </div>
 
-      {/* Separación entre el formulario y el pie de página (puede ser opcional) */}
       <div className="mt-12" />
 
-      {/* Footer */}
       <footer className="bg-gray-900 text-white text-center py-6 px-4">
         <p className="text-sm sm:text-base font-medium">
-          ¿Tienes dudas? Contáctanos:{" "}
+          ¿Tienes dudas? Contáctanos:
           <a
             href="mailto:contacto@aerolinea.com"
             className="text-blue-400 hover:underline"

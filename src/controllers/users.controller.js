@@ -18,7 +18,7 @@ export const createUser = async (req, res) => {
       return res.status(400).json({ message: "El usuario ya existe" });
     }
     const passwordHash = await bcrypt.hash(password, 10);
-    const pasaporte = `${nombre.toLowerCase()}_${apellido.toLowerCase()}_pasaporte.png`; // Manteniendo la lógica de ejemplo
+    const pasaporte = `${nombre.toLowerCase()}_${apellido.toLowerCase()}_pasaporte.png`; 
 
     const newUser = new User({
       nombre,
@@ -143,8 +143,7 @@ export const deleteUser = async (req, res) => {
 export const getUsersByRole = async (req, res) => {
   const { rol } = req.params;
   try {
-    const users = await User.find({ rol: rol }).select("-password"); // No devolver password
-    // Si no se encuentran usuarios, devuelve un array vacío con status 200
+    const users = await User.find({ rol: rol }).select("-password"); 
     res.status(200).json(users);
   } catch (error) {
     console.error(`Error al obtener usuarios con rol ${rol}:`, error);
@@ -156,8 +155,8 @@ export const getUsersByRole = async (req, res) => {
 
 export const getPilotos = async (req, res) => {
   try {
-    const capitanes = await User.find({ rol: "Piloto" }).select("-password"); // Sin '.select()' ni '.map()' para devolver todo menos la contraseña
-    res.status(200).json(capitanes); // Devuelve el array de objetos de usuario completos
+    const capitanes = await User.find({ rol: "Piloto" }).select("-password"); 
+    res.status(200).json(capitanes);
   } catch (error) {
     console.error("Error al obtener capitanes:", error);
     res
@@ -166,11 +165,10 @@ export const getPilotos = async (req, res) => {
   }
 };
 
-// NUEVA FUNCIÓN: Obtener solo las azafatas - Retorna el documento completo
 export const getAzafatas = async (req, res) => {
   try {
-    const azafatas = await User.find({ rol: "Azafata" }).select("-password"); // Sin '.select()' ni '.map()' para devolver todo menos la contraseña
-    res.status(200).json(azafatas); // Devuelve el array de objetos de usuario completos
+    const azafatas = await User.find({ rol: "Azafata" }).select("-password"); 
+    res.status(200).json(azafatas); 
   } catch (error) {
     console.error("Error al obtener azafatas:", error);
     res
@@ -180,8 +178,7 @@ export const getAzafatas = async (req, res) => {
 };
 
 export const userUpload = async (req, res) => {
-  const { userId } = req.params; // ID del usuario a actualizar (viene de la URL)
-  // Datos a actualizar (vienen del cuerpo de la petición)
+  const { userId } = req.params; 
   const {
     nombre,
     apellido,
@@ -204,11 +201,8 @@ export const userUpload = async (req, res) => {
       return res.status(404).json({ message: "Usuario no encontrado." });
     }
 
-    // Actualiza solo los campos que se proporcionan en el cuerpo de la petición
-    // Se usa '!== undefined' para permitir que un campo se actualice a un valor vacío o nulo si se envía explícitamente.
     if (nombre !== undefined) userToUpdate.nombre = nombre;
     if (apellido !== undefined) userToUpdate.apellido = apellido;
-    // Si el email cambia, verifica que no esté ya en uso por otro usuario
     if (email !== undefined && userToUpdate.email !== email) {
       const existingUserWithEmail = await User.findOne({ email });
       if (
@@ -226,16 +220,14 @@ export const userUpload = async (req, res) => {
     if (telefono !== undefined) userToUpdate.telefono = telefono;
     if (direccion !== undefined) userToUpdate.direccion = direccion;
     if (rol !== undefined) userToUpdate.rol = rol;
-    if (pasaporte !== undefined) userToUpdate.pasaporte = pasaporte; // Asumiendo que 'pasaporte' es un string (ej. una URL externa o texto)
+    if (pasaporte !== undefined) userToUpdate.pasaporte = pasaporte; 
 
-    // Si se proporciona una nueva contraseña, hashearla y actualizarla
     if (password) {
       userToUpdate.password = await bcrypt.hash(password, 10);
     }
 
     const updatedUser = await userToUpdate.save();
 
-    // Prepara el objeto de respuesta, excluyendo la contraseña
     const { password: _, ...userWithoutPassword } = updatedUser.toObject();
 
     res.status(200).json({
@@ -244,16 +236,13 @@ export const userUpload = async (req, res) => {
     });
   } catch (error) {
     console.error(`Error al actualizar datos del usuario ${userId}:`, error);
-    // Manejo de errores específicos
     if (error.code === 11000) {
-      // Error de duplicidad (por ejemplo, si otro campo único causa conflicto)
       return res.status(409).json({
         message:
           "Error al actualizar: Ya existe un registro con este dato (ej. email).",
       });
     }
     if (error.name === "ValidationError") {
-      // Errores de validación del esquema de Mongoose
       const messages = Object.values(error.errors).map((val) => val.message);
       return res.status(400).json({ message: messages });
     }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useVuelos } from "../context/VuelosContext"; // Asegúrate de la ruta correcta
+import { useVuelos } from "../context/VuelosContext"; 
 
 const AdminStatusPage = () => {
   const { vuelos, loading, error, updateVueloStatus } = useVuelos();
@@ -85,7 +85,6 @@ const AdminStatusPage = () => {
         )}
 
         <div className="mb-8 flex flex-col sm:flex-row gap-4">
-          {/* Filtro por status */}
           <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4">
             <label
               htmlFor="filtroStatus"
@@ -126,11 +125,9 @@ const AdminStatusPage = () => {
           </div>
         </div>
 
-        {/* Indicador de carga */}
         {loading ? (
           <p className="text-gray-700">Cargando vuelos...</p>
         ) : (
-          /* Contenedor de tarjetas de vuelos */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {vuelosFiltrados.length > 0 ? (
               vuelosFiltrados.map((vuelo) => (
@@ -138,11 +135,9 @@ const AdminStatusPage = () => {
                   key={vuelo._id}
                   className="bg-gray-100 p-6 rounded-xl shadow-md"
                 >
-                  {/* Origen y Destino en negrita y más grande */}
                   <h2 className="text-xl font-semibold text-gray-900 mb-1">
                     {vuelo.origen} → {vuelo.destino}
                   </h2>
-                  {/* Fecha de salida y llegada */}
                   <p className="text-gray-600 text-sm">
                     Salida: {formatDateTime(vuelo.fechaSalida)}
                   </p>

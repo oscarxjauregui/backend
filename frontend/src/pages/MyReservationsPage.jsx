@@ -3,15 +3,12 @@ import { useMyReservations } from "../context/MyReservationsContext";
 import { Link } from "react-router-dom";
 
 function MyReservationsPage() {
-  // Asegúrate de que los nombres aquí coincidan con lo que tu MyReservationsContext exporta
   const { reservations, loading, error, fetchUserReservations } =
     useMyReservations();
 
   useEffect(() => {
-    // Este efecto se ejecutará cada vez que fetchUserReservations cambie (que es raro, gracias a useCallback)
-    // o cuando el componente se monte inicialmente.
     fetchUserReservations();
-  }, [fetchUserReservations]); // Dependencia correcta para useCallback
+  }, [fetchUserReservations]); 
 
   const formatDate = useCallback((dateString) => {
     if (!dateString) return "N/A";
@@ -26,12 +23,10 @@ function MyReservationsPage() {
       };
 
       let date;
-      // Intenta parsear directamente
       date = new Date(dateString);
 
-      // Lógica de fallback para formatos específicos (si realmente son necesarios)
       if (
-        isNaN(date.getTime()) && // Si la primera conversión falló
+        isNaN(date.getTime()) && 
         dateString.includes("/") &&
         dateString.includes(" ")
       ) {
@@ -46,12 +41,12 @@ function MyReservationsPage() {
       if (!isNaN(date.getTime())) {
         return date.toLocaleString("es-ES", options);
       }
-      return "Fecha inválida"; // Si ninguna conversión funciona
+      return "Fecha inválida";
     } catch (e) {
       console.error("Error formatting date:", e);
       return "Fecha inválida";
     }
-  }, []); // Dependencia vacía para useCallback, ya que no usa variables externas que cambien
+  }, []); 
 
   if (loading) {
     return (
@@ -62,7 +57,6 @@ function MyReservationsPage() {
   }
 
   if (error) {
-    // Asegurarse de que 'error' sea un string o un objeto con un mensaje
     const errorMessage =
       typeof error === "string" ? error : error.message || "Error desconocido";
     return (
@@ -104,18 +98,14 @@ function MyReservationsPage() {
         </h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {reservations.map((reservation) => {
-            // --- ¡DEBUGGING CRÍTICO AQUÍ! ---
             console.log("Procesando reservación:", reservation);
             console.log(
               "reservation.vueloId (antes de usarlo):",
               reservation.vueloId
             );
-            // ----------------------------------
 
             const vuelo = reservation.vueloId;
 
-            // --- CHEQUEOS DEFENSIVOS APLICADOS ---
-            // Verifica que 'vuelo' exista, sea un objeto y tenga las propiedades 'origen' y 'destino'
             if (
               !vuelo ||
               typeof vuelo !== "object" ||
@@ -123,8 +113,8 @@ function MyReservationsPage() {
               !vuelo.destino ||
               !vuelo.aerolinea ||
               !vuelo.fechaSalida ||
-              typeof reservation.asientos === "undefined" || // También revisa si asientos está presente
-              typeof vuelo.costo === "undefined" // Revisa si costo está presente
+              typeof reservation.asientos === "undefined" || 
+              typeof vuelo.costo === "undefined" 
             ) {
               console.warn(
                 `Datos de vuelo o reservación incompletos o incorrectos para reservación ID: ${reservation._id}. Datos recibidos:`,
@@ -162,9 +152,7 @@ function MyReservationsPage() {
               >
                 <div>
                   <h2 className="text-xl font-semibold mb-2 text-gray-900">
-                    Vuelo: {vuelo.origen} -{" "}
-                    {/* Usamos 'vuelo' que ya es el objeto poblado */}
-                    {vuelo.destino}
+                    Vuelo: {vuelo.origen} {vuelo.destino}
                   </h2>
                   <p className="text-sm text-gray-700 mb-1">
                     Aerolínea:{" "}
@@ -185,7 +173,7 @@ function MyReservationsPage() {
                   <p className="text-lg font-bold text-emerald-600 mt-2">
                     Costo por asiento: ${" "}
                     {vuelo.costo
-                      ? vuelo.costo.toFixed(2) // Aseguramos que 'costo' es un número
+                      ? vuelo.costo.toFixed(2) 
                       : "N/A"}{" "}
                     USD
                   </p>

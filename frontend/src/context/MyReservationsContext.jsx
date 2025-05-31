@@ -1,4 +1,3 @@
-// src/context/MyReservationsContext.jsx
 
 import {
   createContext,
@@ -8,7 +7,7 @@ import {
   useCallback,
 } from "react";
 import {
-  getUserReservaciones, // <-- Esta es la función de tu api
+  getUserReservaciones, 
   cancelReservationRequest,
 } from "../api/reservaciones";
 import { useAuth } from "./AuthContext";
@@ -42,12 +41,10 @@ export const MyReservationsProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      // Si getUserReservaciones devuelve directamente el array de reservaciones
       const userReservationsArray = await getUserReservaciones(); 
       
-      // Comprueba si el resultado es un array
       if (Array.isArray(userReservationsArray)) {
-        setReservations(userReservationsArray); // <-- ¡Cambio aquí!
+        setReservations(userReservationsArray); 
       } else {
         console.warn("getUserReservaciones no devolvió un array. Reiniciando a vacío.");
         setReservations([]);
@@ -64,7 +61,7 @@ export const MyReservationsProvider = ({ children }) => {
 
   useEffect(() => {
     fetchUserReservations();
-  }, [fetchUserReservations]); // Ya corregido
+  }, [fetchUserReservations]);
 
   const cancelReservation = useCallback(async (reservationId) => {
     setLoading(true);

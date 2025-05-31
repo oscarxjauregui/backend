@@ -5,24 +5,22 @@ import {
   FiMail,
   FiPhone,
   FiMapPin,
-  FiBriefcase, // Para el rol
-  FiCreditCard, // Para el pasaporte (ejemplo)
+  FiBriefcase, 
+  FiCreditCard,
   FiArrowLeft,
-} from "react-icons/fi"; // Importa los iconos que necesites
-import { useAuth } from "../context/AuthContext"; // Importa el AuthContext
+} from "react-icons/fi"; 
+import { useAuth } from "../context/AuthContext";
 
 function ProfilePage() {
   const navigate = useNavigate();
-  const { user, loading, isAuthenticated } = useAuth(); // Obtén user, loading y isAuthenticated del AuthContext
+  const { user, loading, isAuthenticated } = useAuth(); 
 
-  // Redirigir si el usuario no está logueado o si la carga termina y no hay usuario
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       navigate("/login");
     }
   }, [loading, isAuthenticated, navigate]);
 
-  // Si aún está cargando, puedes mostrar un spinner o un mensaje
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -34,7 +32,6 @@ function ProfilePage() {
     );
   }
 
-  // Si no hay usuario después de cargar (debería redirigir arriba, pero es una seguridad)
   if (!user) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -53,25 +50,23 @@ function ProfilePage() {
     );
   }
 
-  // Renderiza el perfil si el usuario está autenticado y disponible
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
       <div className="bg-gray-900 text-white py-6 px-4 shadow-md">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <button
-            onClick={() => navigate(-1)} // Para volver a la página anterior
+            onClick={() => navigate(-1)}
             className="flex items-center gap-2 hover:bg-gray-800 p-2 rounded-full transition"
           >
             <FiArrowLeft size={20} />
           </button>
           <h1 className="text-2xl font-bold">Mi Perfil</h1>
-          <div className="w-8"></div> {/* Espaciador */}
+          <div className="w-8"></div> 
+          
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-6">
-        {/* Tarjeta de perfil */}
         <div className="bg-gray-100 rounded-xl shadow-md overflow-hidden mb-6">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
@@ -82,7 +77,6 @@ function ProfilePage() {
 
           <div className="px-6 py-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Campo Nombre Completo */}
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-gray-200 rounded-full text-gray-900">
                   <FiUser />
@@ -97,7 +91,6 @@ function ProfilePage() {
                 </div>
               </div>
 
-              {/* Campo Email */}
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-gray-200 rounded-full text-gray-900">
                   <FiMail />
@@ -110,7 +103,6 @@ function ProfilePage() {
                 </div>
               </div>
 
-              {/* Campo Teléfono */}
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-gray-200 rounded-full text-gray-900">
                   <FiPhone />
@@ -125,7 +117,6 @@ function ProfilePage() {
                 </div>
               </div>
 
-              {/* Campo Dirección */}
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-gray-200 rounded-full text-gray-900">
                   <FiMapPin />
@@ -140,7 +131,6 @@ function ProfilePage() {
                 </div>
               </div>
 
-              {/* Campo Rol */}
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-gray-200 rounded-full text-gray-900">
                   <FiBriefcase />
@@ -155,7 +145,6 @@ function ProfilePage() {
                 </div>
               </div>
 
-              {/* Campo Pasaporte (Si tienes la URL de una imagen) */}
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-gray-200 rounded-full text-gray-900">
                   <FiCreditCard />
@@ -176,7 +165,6 @@ function ProfilePage() {
                 </div>
               </div>
 
-              {/* Otros campos que quieras mostrar (ej. createdAt) */}
               <div className="col-span-full">
                 <label className="block text-sm font-medium text-gray-600 mb-1">
                   Miembro desde

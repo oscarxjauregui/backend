@@ -18,6 +18,9 @@ import nominaRoutes from "./routes/nomina.routes.js";
 import reportesRoutes from "./routes/reportes.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import sendEmailRoutes from "./routes/sendEmail.routes.js";
+import paypalRoutes from "./routes/paypal.routes.js";
+import { handleStripeWebhook } from "./controllers/webhook.controller.js"; 
+import { handlePayPalWebhook } from "./controllers/paypalWebhook.controller.js"; 
 
 const app = express();
 
@@ -54,5 +57,18 @@ app.use("/api/reportes", reportesRoutes);
 app.use("/api", paymentRoutes);
 
 app.use("/api", sendEmailRoutes);
+
+app.use("/api", paypalRoutes);
+
+app.post(
+  "/api/payment/webhook",
+  express.raw({ type: "application/json" }),
+  handleStripeWebhook
+);
+app.post(
+  "/api/paypal/webhook",
+  express.raw({ type: "application/json" }),
+  handlePayPalWebhook
+);
 
 export default app;

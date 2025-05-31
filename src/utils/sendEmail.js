@@ -1,30 +1,25 @@
-// backend/src/utils/emailSender.js
 import nodemailer from "nodemailer";
-import dotenv from "dotenv"; // Asegúrate de importar dotenv aquí también para esta utilidad
+import dotenv from "dotenv"; 
 
-dotenv.config(); // Carga las variables de entorno para esta utilidad
+dotenv.config();
 
-// Función genérica para enviar correos
 export const sendEmail = async (to, subject, text, html = '') => {
   try {
     const config = {
       host: process.env.SMTP_HOST,
       port: parseInt(process.env.SMTP_PORT, 10),
-      secure: process.env.SMTP_PORT === '465', // true para 465 (SSL/TLS), false para otros (STARTTLS)
+      secure: process.env.SMTP_PORT === '465',
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
-      // Descomenta esto solo si tienes problemas de certificado SSL en desarrollo (NO USAR EN PRODUCCIÓN)
-      // tls: {
-      //   rejectUnauthorized: false
-      // }
+ 
     };
 
     const transporter = nodemailer.createTransport(config);
 
     const mensaje = {
-      from: `Vuelazos XD <${process.env.SMTP_USER}>`, // Remitente visible
+      from: `Vuelazos XD <${process.env.SMTP_USER}>`, 
       to: to,
       subject: subject,
       text: text,

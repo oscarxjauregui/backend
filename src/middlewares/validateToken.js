@@ -20,11 +20,11 @@ export const authRequired = async (req, res, next) => {
 
       console.log("--- Debugging authRequired middleware ---");
       console.log("userPayload del token:", userPayload);
-      console.log("foundUser DESPUÉS del await:", foundUser); // Vuelve a revisar esto
+      console.log("foundUser DESPUÉS del await:", foundUser);
       console.log(
         "req.user.rol:",
         foundUser ? foundUser.rol : "foundUser es nulo/indefinido"
-      ); // También cambié esta línea para debug
+      );
       console.log("---------------------------------------");
 
       if (!foundUser) {
@@ -34,7 +34,7 @@ export const authRequired = async (req, res, next) => {
       }
       req.user = foundUser;
 
-      next(); // Pasa el control al siguiente middleware (adminRequired)
+      next(); 
     } catch (dbError) {
       console.error("Error al buscar usuario en la base de datos:", dbError);
       return res

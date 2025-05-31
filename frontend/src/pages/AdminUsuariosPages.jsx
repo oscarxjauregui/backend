@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
-import { useUsers } from "../context/UsersContext"; // Asegúrate de que la ruta sea correcta
+import { useUsers } from "../context/UsersContext";
 
 const AdminUsuariosPage = () => {
   const {
-    users, // Ahora obtenemos todos los usuarios del contexto
+    users, 
     loadingUsers,
     errorUsers,
     createUser,
@@ -17,7 +17,7 @@ const AdminUsuariosPage = () => {
     nombre: "",
     apellido: "",
     email: "",
-    password: "", // La contraseña es necesaria para la creación, opcional para la actualización
+    password: "", 
     telefono: "",
     direccion: "",
     rol: "",
@@ -27,17 +27,16 @@ const AdminUsuariosPage = () => {
   const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState(null);
 
-  // Estados para filtros
+  
   const [filterRole, setFilterRole] = useState("");
-  const [filterName, setFilterName] = useState(""); // Filtrar por nombre/apellido
+  const [filterName, setFilterName] = useState(""); 
 
-  // Efecto para filtrar usuarios cada vez que cambian los filtros o la lista de usuarios
   const filteredUsers = users.filter((user) => {
     const matchesRole = filterRole ? user.rol === filterRole : true;
     const matchesName = filterName
       ? user.nombre.toLowerCase().includes(filterName.toLowerCase()) ||
         user.apellido.toLowerCase().includes(filterName.toLowerCase()) ||
-        user.email.toLowerCase().includes(filterName.toLowerCase()) // También permite filtrar por email
+        user.email.toLowerCase().includes(filterName.toLowerCase()) 
       : true;
     return matchesRole && matchesName;
   });
@@ -62,12 +61,12 @@ const AdminUsuariosPage = () => {
     });
     setEditingUserId(null);
     setShowModal(false);
-    setMessage(null); // Limpiar mensajes al resetear el formulario
+    setMessage(null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage(null); // Limpiar mensajes anteriores
+    setMessage(null);
 
     let res;
     if (editingUserId) {
@@ -76,9 +75,7 @@ const AdminUsuariosPage = () => {
       );
       if (confirmUpdate) {
         const dataToUpdate = {};
-        // Solo enviar campos que tienen un valor o que deben actualizarse (como la contraseña si se proporciona)
         for (const key in formData) {
-          // Si es el campo de contraseña y está vacío, no lo envíes para actualizar
           if (key === "password" && formData[key] === "") {
             continue;
           }
@@ -111,7 +108,7 @@ const AdminUsuariosPage = () => {
       if (res && res.success) {
         setMessage({ type: "success", text: res.message });
         if (editingUserId === id) {
-          resetForm(); // Cerrar el modal si el usuario eliminado estaba siendo editado
+          resetForm(); 
         }
       } else if (res && res.message) {
         setMessage({ type: "error", text: res.message });
@@ -125,7 +122,7 @@ const AdminUsuariosPage = () => {
       nombre: userToEdit.nombre || "",
       apellido: userToEdit.apellido || "",
       email: userToEdit.email || "",
-      password: "", // NUNCA precargar la contraseña por seguridad
+      password: "",
       telefono: userToEdit.telefono || "",
       direccion: userToEdit.direccion || "",
       rol: userToEdit.rol || "",
@@ -149,7 +146,6 @@ const AdminUsuariosPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navbar de administrador */}
       <header className="bg-gray-900 text-white p-4">
         <div className="container mx-auto flex justify-between items-center">
           <Link to="/homea" className="text-2xl font-bold hover:text-gray-400">
@@ -164,7 +160,6 @@ const AdminUsuariosPage = () => {
           Gestión de Usuarios
         </h1>
 
-        {/* Notification Messages */}
         {message && (
           <div
             className={`p-4 mb-4 rounded-md ${
@@ -178,7 +173,6 @@ const AdminUsuariosPage = () => {
           </div>
         )}
 
-        {/* Button to open creation modal */}
         <button
           onClick={() => {
             resetForm();
@@ -189,7 +183,6 @@ const AdminUsuariosPage = () => {
           Crear Nuevo Usuario
         </button>
 
-        {/* Create/Edit User Modal */}
         {showModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-2xl mx-4 overflow-y-auto max-h-[90vh]">
@@ -210,7 +203,6 @@ const AdminUsuariosPage = () => {
                 onSubmit={handleSubmit}
                 className="grid md:grid-cols-2 gap-6"
               >
-                {/* Nombre */}
                 <div className="relative">
                   <label
                     htmlFor="nombre"
@@ -225,11 +217,10 @@ const AdminUsuariosPage = () => {
                     placeholder="Nombre"
                     value={formData.nombre}
                     onChange={handleChange}
-                    required={!editingUserId} // Requerido para nuevo, opcional para editar
+                    required={!editingUserId}
                     className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
                   />
                 </div>
-                {/* Apellido */}
                 <div className="relative">
                   <label
                     htmlFor="apellido"
@@ -248,7 +239,6 @@ const AdminUsuariosPage = () => {
                     className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
                   />
                 </div>
-                {/* Email */}
                 <div className="relative">
                   <label
                     htmlFor="email"
@@ -267,7 +257,6 @@ const AdminUsuariosPage = () => {
                     className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
                   />
                 </div>
-                {/* Contraseña (siempre requerida para nuevo, opcional para actualizar) */}
                 <div className="relative">
                   <label
                     htmlFor="password"
@@ -286,11 +275,10 @@ const AdminUsuariosPage = () => {
                     }
                     value={formData.password}
                     onChange={handleChange}
-                    required={!editingUserId} // Solo es requerido si se está creando un nuevo usuario
+                    required={!editingUserId} 
                     className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
                   />
                 </div>
-                {/* Teléfono */}
                 <div className="relative">
                   <label
                     htmlFor="telefono"
@@ -309,7 +297,6 @@ const AdminUsuariosPage = () => {
                     className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
                   />
                 </div>
-                {/* Dirección */}
                 <div className="relative">
                   <label
                     htmlFor="direccion"
@@ -328,7 +315,6 @@ const AdminUsuariosPage = () => {
                     className="p-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-800 text-gray-900 w-full"
                   />
                 </div>
-                {/* Rol */}
                 <div className="relative">
                   <label
                     htmlFor="rol"
@@ -352,7 +338,6 @@ const AdminUsuariosPage = () => {
                   </select>
                 </div>
 
-                {/* Botón de Envío */}
                 <button
                   type="submit"
                   className="bg-black hover:bg-gray-800 text-white py-4 rounded-md mt-6 w-full col-span-full"
@@ -366,13 +351,11 @@ const AdminUsuariosPage = () => {
           </div>
         )}
 
-        {/* Sección de Filtros */}
         <div className="bg-white p-6 rounded-lg shadow-md mb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             Filtros de Usuarios
           </h2>
           <div className="grid md:grid-cols-2 gap-4">
-            {/* Filtrar por Rol */}
             <div className="relative">
               <label
                 htmlFor="filterRole"
@@ -393,7 +376,6 @@ const AdminUsuariosPage = () => {
                 <option value="Azafata">Azafata</option>
               </select>
             </div>
-            {/* Filtrar por Nombre/Email */}
             <div className="relative">
               <label
                 htmlFor="filterName"
@@ -413,7 +395,6 @@ const AdminUsuariosPage = () => {
           </div>
         </div>
 
-        {/* Lista de Usuarios */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredUsers.length === 0 && !loadingUsers ? (
             <p className="text-gray-600 text-center col-span-full">
@@ -422,7 +403,7 @@ const AdminUsuariosPage = () => {
           ) : (
             filteredUsers.map((user) => (
               <div
-                key={user._id || user.id} // Usar _id de MongoDB
+                key={user._id || user.id} 
                 className="bg-gray-200 border border-gray-300 rounded-lg p-4 shadow-md"
               >
                 <h3 className="text-xl font-semibold text-gray-900">

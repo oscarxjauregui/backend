@@ -1,7 +1,6 @@
 import Vuelo from "../models/vuelo.model.js";
 import mongoose from "mongoose";
 
-// Obtener todos los vuelos
 export const getVuelos = async (req, res) => {
   try {
     const vuelos = await Vuelo.find({});
@@ -11,7 +10,6 @@ export const getVuelos = async (req, res) => {
   }
 };
 
-// Obtener un vuelo por su ID
 export const getVueloById = async (req, res) => {
   try {
     const vuelo = await Vuelo.findById(req.params.id);
@@ -43,7 +41,6 @@ export const getVuelosByDestino = async (req, res) => {
   }
 };
 
-// Crear un nuevo vuelo
 export const vueloUpload = async (req, res) => {
   const {
     origen,
@@ -63,7 +60,6 @@ export const vueloUpload = async (req, res) => {
   } = req.body;
 
   try {
-    // Validar que todos los campos requeridos estén presentes
     if (
       !origen ||
       !destino ||
@@ -80,7 +76,6 @@ export const vueloUpload = async (req, res) => {
         .json({ message: "Todos los campos son obligatorios" });
     }
 
-    // Crear un nuevo vuelo
     const nuevoVuelo = new Vuelo({
       origen,
       destino,
@@ -98,10 +93,8 @@ export const vueloUpload = async (req, res) => {
       estado,
     });
 
-    // Guardar el vuelo en la base de datos
     const vueloGuardado = await nuevoVuelo.save();
 
-    // Responder con el vuelo creado
     res.status(201).json(vueloGuardado);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -193,7 +186,7 @@ export const updateVuelo = async (req, res) => {
 
   const updateData = { ...req.body };
   if (req.file) {
-    updateData.imagen = req.file.path; // O req.file.location si usas S3
+    updateData.imagen = req.file.path;
   }
 
   try {
@@ -217,7 +210,6 @@ export const updateVuelo = async (req, res) => {
   }
 };
 
-// Eliminar un vuelo
 
 export const deleteVuelo = async (req, res) => {
   const { id } = req.params;

@@ -1,13 +1,12 @@
-// src/pages/VueloStatusPage.jsx
 
 import { useState, useEffect, useCallback } from "react";
-import { useVuelos } from "../context/VuelosContext"; // Asegúrate de que la ruta sea correcta
+import { useVuelos } from "../context/VuelosContext"; 
 
 function VueloStatusPage() {
   const { vuelos, loading, error, fetchVuelos } = useVuelos();
 
   const [filtroEstado, setFiltroEstado] = useState("Todos");
-  const [filtroDestino, setFiltroDestino] = useState(""); // Corregido para destino
+  const [filtroDestino, setFiltroDestino] = useState(""); 
   const [filtroFechaLlegada, setFiltroFechaLlegada] = useState("");
 
   useEffect(() => {

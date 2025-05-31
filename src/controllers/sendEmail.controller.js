@@ -1,7 +1,5 @@
-// backend/src/controllers/sendEmail.controller.js
-import { sendEmail } from "../utils/sendEmail.js"; // Importa la utilidad
+import { sendEmail } from "../utils/sendEmail.js"
 
-// Controlador para la ruta API de envío de correos (para pruebas con JSON)
 export const enviarMail = async (req, res) => {
   try {
     const { to, subject, text, html } = req.body;
@@ -13,7 +11,6 @@ export const enviarMail = async (req, res) => {
       });
     }
 
-    // Llama a la función de utilidad para enviar el correo
     const result = await sendEmail(to, subject, text, html);
 
     if (result.success) {

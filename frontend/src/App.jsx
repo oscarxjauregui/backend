@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
@@ -39,6 +40,12 @@ import ProtectedRoute from "./ProtectedRoute";
 import Navbar from "./components/Navbar";
 
 function App() {
+  const initialOptions = {
+    "client-id": "TU_PAYPAL_CLIENT_ID_DEL_FRONTEND",
+    currency: "USD",
+    intent: "capture",
+  };
+
   return (
     <AuthProvider>
       <MyReservationsProvider>
@@ -51,6 +58,7 @@ function App() {
                     <ReportesProvider>
                       <TicketProvider>
                         <Elements stripe={stripePromise}>
+                          <PayPalScriptProvider options={initialOptions}>
                             <BrowserRouter>
                               <Navbar />
                               <Routes>
@@ -89,7 +97,7 @@ function App() {
                                     element={<PaymentSuccessPage />}
                                   />
                                   <Route
-                                    path="/myreservations/:id/ticket" // :id será el ID de la reservación
+                                    path="/myreservations/:id/ticket"
                                     element={<TicketPage />}
                                   />
                                 </Route>
@@ -130,6 +138,7 @@ function App() {
                                 </Route>
                               </Routes>
                             </BrowserRouter>
+                          </PayPalScriptProvider>
                         </Elements>
                       </TicketProvider>
                     </ReportesProvider>

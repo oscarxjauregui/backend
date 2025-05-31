@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { FiChevronRight, FiSearch } from "react-icons/fi";
 import { useVuelos } from "../context/VuelosContext";
-// Importa todas las imágenes necesarias para los destinos
 import cdmxImg from "/images/cdmx.jpg";
 import cancunImg from "/images/cancun.jpg";
 import monterreyImg from "/images/monterrey.jpg";
@@ -23,18 +22,15 @@ const Home = () => {
   const normalizeFlightDate = (dateStr) => {
     if (!dateStr) return null;
 
-    // Si ya está en formato YYYY-MM-DD
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
       return dateStr;
     }
 
-    // Si está en formato DD/MM/YYYY
     if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) {
       const [day, month, year] = dateStr.split("/");
       return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
     }
 
-    // Si está en otro formato (como timestamp)
     try {
       return new Date(dateStr).toISOString().split("T")[0];
     } catch {
@@ -54,14 +50,12 @@ const Home = () => {
         ? vuelo.destino.toLowerCase().includes(searchDestination.toLowerCase())
         : true;
 
-      // Usamos fechaSalida o fecha según lo que contenga tu API
       const flightDate = vuelo.fechaSalida || vuelo.fecha;
       const normalizedFlightDate = normalizeFlightDate(flightDate);
       const matchesDate = searchDate
         ? normalizedFlightDate === searchDate
         : true;
 
-      // Debug: Muestra las fechas que se están comparando
       console.log("Comparando:", {
         searchDate,
         flightDate,
@@ -78,9 +72,8 @@ const Home = () => {
     if (!dateStr) return "Fecha no disponible";
 
     try {
-      // Primero normalizamos la fecha
       const normalized = normalizeFlightDate(dateStr);
-      if (!normalized) return dateStr; // Si no se pudo normalizar
+      if (!normalized) return dateStr; 
 
       const date = new Date(normalized);
       return date.toLocaleDateString("es-MX", {
@@ -90,13 +83,10 @@ const Home = () => {
       });
     } catch (error) {
       console.error("Error formateando fecha:", dateStr, error);
-      return dateStr; // Devuelve el formato original si hay error
+      return dateStr; 
     }
   };
 
-  // Datos combinados y enriquecidos para los destinos.
-  // Cada objeto incluye nombre (para mostrar), slug (para la URL),
-  // y todos los detalles de vuelo (precio, fecha, etc.) junto con la imagen importada.
   const allDestinosData = useMemo(
     () => [
       {
@@ -162,20 +152,14 @@ const Home = () => {
         asientos: 20,
         avion: "Boeing 757",
       },
-      // Si necesitas los destinos adicionales de tu HomePage provisional, agrégalos aquí con sus imágenes importadas
-      // { nombre: "Querétaro", slug: "queretaro", precio: "$950 MXN", img: queretaroImg, fecha: "28/06/2025", asientos: 20, avion: "Embraer 175" },
-      // { nombre: "Toluca", slug: "toluca", precio: "$800 MXN", img: tolucaImg, fecha: "01/07/2025", asientos: 35, avion: "Cessna 208" },
-      // { nombre: "Chihuahua", slug: "chihuahua", precio: "$1,450 MXN", img: chihuahuaImg, fecha: "05/07/2025", asientos: 22, avion: "Airbus A320" },
     ],
     []
   );
 
-  // Muestra solo los primeros 4 destinos en la página principal, consistente con tu diseño original de 'Home'.
   const destinosPrincipales = allDestinosData.slice(0, 4);
 
   return (
     <div className="bg-white text-gray-900 font-sans pt-16">
-      {/* Bienvenida */}
       <section className="py-20 bg-gradient-to-br from-white to-gray-100 text-center">
         <motion.h1
           className="text-5xl md:text-6xl font-extrabold mb-4"
@@ -195,7 +179,6 @@ const Home = () => {
           accesibles, y atención excepcional.
         </motion.p>
       </section>
-      {/* --- Buscador de Vuelos --- */}
       <section className="bg-gray-50">
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-4xl font-bold text-center mb-8">
@@ -203,7 +186,6 @@ const Home = () => {
           </h2>
 
           <div className="flex flex-col md:flex-row gap-4 mb-8 items-center justify-center">
-            {/* Input de destino */}
             <div className="relative w-full md:w-1/3">
               <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
@@ -215,7 +197,6 @@ const Home = () => {
               />
             </div>
 
-            {/* Input de fecha */}
             <div className="relative w-full md:w-1/4">
               <input
                 type="date"
@@ -236,7 +217,6 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Resultados de la Búsqueda */}
           {loading ? (
             <div className="text-center py-12">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mb-4"></div>
@@ -250,7 +230,7 @@ const Home = () => {
             <>
               <h3 className="text-2xl font-bold text-center mb-6 text-gray-800">
                 {searchResults.length > 0
-                  ? `✈️ ${searchResults.length} vuelos encontrados` // <-- Aquí está la corrección principal
+                  ? `✈️ ${searchResults.length} vuelos encontrados` 
                   : "No encontramos vuelos"}
               </h3>
 
@@ -333,7 +313,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Sección de Destinos Populares (anteriormente 'Vuelos') */}
       <section className="bg-gray-100 py-10">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-center mb-12">
@@ -343,7 +322,7 @@ const Home = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {destinosPrincipales.map((destino, i) => (
               <motion.div
-                key={destino.slug} // Usa el slug como key para mayor estabilidad
+                key={destino.slug} 
                 className="relative group cursor-pointer"
                 whileHover={{ scale: 1.03 }}
                 initial={{ opacity: 0, y: 40 }}
@@ -351,7 +330,6 @@ const Home = () => {
                 transition={{ duration: 0.4, delay: i * 0.1 }}
                 viewport={{ once: true }}
               >
-                {/* Tarjeta principal del destino */}
                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
                   <img
                     src={destino.img}
@@ -363,12 +341,10 @@ const Home = () => {
                   </div>
                 </div>
 
-                {/* Ventana flotante con detalles del vuelo */}
                 <div
-                  // Este onClick ahora navega a la página específica de vuelos para este destino
                   onClick={() => navigate(`/vuelos/${destino.slug}`)}
                   className="absolute top-1/2 left-1/2 w-64 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-2xl p-4 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-auto"
-                  style={{ pointerEvents: "none" }} // Deshabilita el pointer-events por defecto para que el click del padre lo capture
+                  style={{ pointerEvents: "none" }} 
                 >
                   <h4 className="text-lg font-semibold mb-2">
                     Detalles del vuelo
@@ -381,8 +357,6 @@ const Home = () => {
                     className="text-center mt-3 text-sm text-blue-600 font-medium hover:underline"
                     style={{ pointerEvents: "auto" }}
                   >
-                    {" "}
-                    {/* Habilita el pointer-events de nuevo para el texto del enlace si quieres que el clic específico sea solo ahí */}
                     Ver vuelos y reservar
                   </p>
                 </div>
@@ -392,7 +366,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ¿Por qué elegirnos? */}
       <section className="bg-white py-20 text-center">
         <h2 className="text-4xl font-bold mb-8">¿Por qué elegirnos?</h2>
         <p className="text-gray-600 mb-12 max-w-2xl mx-auto">
@@ -432,7 +405,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Comentarios */}
       <section className="bg-gray-100 py-20">
         <div className="max-w-5xl mx-auto text-center">
           <h2 className="text-4xl font-bold mb-10">Nuestros Clientes Opinan</h2>
@@ -476,7 +448,6 @@ const Home = () => {
                 },
               ];
 
-              // Mezclar aleatoriamente
               for (let i = comentarios.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [comentarios[i], comentarios[j]] = [
@@ -485,7 +456,6 @@ const Home = () => {
                 ];
               }
 
-              // Devolver solo los primeros 4 comentarios
               return comentarios.slice(0, 4);
             }, []).map((c, i) => (
               <motion.div
@@ -514,7 +484,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="bg-gray-900 text-white text-center py-8 px-4">
         <p className="text-lg font-medium">
           ¿Tienes dudas? Contáctanos: contacto@aerolinea.com

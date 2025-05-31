@@ -1,24 +1,23 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom"; // Importa useNavigate
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useVuelosByDestino } from "../context/VuelosByDestinoContext";
-import { motion } from "framer-motion"; // Importa motion para las animaciones
-import { FiSearch } from "react-icons/fi"; // Para el icono de búsqueda
+import { motion } from "framer-motion";
+import { FiSearch } from "react-icons/fi";
 
-// Importa todas las imágenes necesarias para los destinos (copiadas de HomePage)
 import cdmxImg from "/images/cdmx.jpg";
 import cancunImg from "/images/cancun.jpg";
 import monterreyImg from "/images/monterrey.jpg";
-import pueblaImg from "/images/cdmx.jpg"; // ¡Recuerda corregir esta si tienes un puebla.jpg real!
+import pueblaImg from "/images/cdmx.jpg";
 import guadalajaraImg from "/images/guadalajara.jpg";
-import veracruzImg from "/images/queretaro.jpg"; // ¡Recuerda corregir esta si tienes un veracruz.jpg real!
+import veracruzImg from "/images/queretaro.jpg";
 import tijuanaImg from "/images/tijuana.jpg";
 
 function VuelosByDestinoPage() {
   const { destino } = useParams();
-  const navigate = useNavigate(); // Inicializa useNavigate
+  const navigate = useNavigate();
 
   const {
-    vuelos: fetchedVuelos, // Renombramos 'vuelos' del contexto a 'fetchedVuelos' para evitar conflicto
+    vuelos: fetchedVuelos,
     loading,
     error,
     noResults,
@@ -26,12 +25,9 @@ function VuelosByDestinoPage() {
     clearVuelos,
   } = useVuelosByDestino();
 
-  // Estado para el filtro de fecha
   const [searchDate, setSearchDate] = useState("");
-  // Estado para los vuelos filtrados
   const [filteredVuelos, setFilteredVuelos] = useState([]);
 
-  // Datos de destinos con imágenes (copiados de HomePage)
   const allDestinosData = useMemo(
     () => [
       {
@@ -101,7 +97,6 @@ function VuelosByDestinoPage() {
     []
   );
 
-  // Funciones para formatear fechas (copiadas de HomePage)
   const formatDateForInput = (dateString) => {
     if (!dateString) return "";
     const parts = dateString.split("/");
@@ -118,12 +113,11 @@ function VuelosByDestinoPage() {
     if (!dateInput) return "";
     const parts = dateInput.split("-");
     if (parts.length === 3) {
-      return `${parts[2]}/${parts[1]}/${parts[0]}`; // Formato DD/MM/YYYY
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
     }
     return dateInput;
   };
 
-  // Efecto para obtener vuelos del contexto cuando cambia el destino
   useEffect(() => {
     console.log(`[VuelosByDestinoPage] Destino en URL: ${destino}`);
     if (destino) {
@@ -139,12 +133,11 @@ function VuelosByDestinoPage() {
     };
   }, [destino, fetchVuelosByDestino, clearVuelos]);
 
-  // Efecto para filtrar los vuelos cada vez que cambian los vuelos obtenidos o la fecha de búsqueda
   useEffect(() => {
     if (Array.isArray(fetchedVuelos)) {
       const currentFiltered = fetchedVuelos.filter((vuelo) => {
         const matchesDate = searchDate
-          ? vuelo.fechaSalida.startsWith(formatDateForComparison(searchDate)) // Asume fechaSalida es "DD/MM/YYYY HH:mm"
+          ? vuelo.fechaSalida.startsWith(formatDateForComparison(searchDate))
           : true;
         return matchesDate;
       });
@@ -154,18 +147,13 @@ function VuelosByDestinoPage() {
     }
   }, [fetchedVuelos, searchDate]);
 
-  // Función para formatear la fecha de los vuelos para mostrar (copiada de HomePage)
   const formatDate = useCallback((dateString) => {
     if (!dateString) return "N/A";
     try {
-      // Intenta parsear como ISO string o como "DD/MM/YYYY HH:mm"
       const date = new Date(dateString);
-      // Si la fecha es inválida (por ejemplo, "DD/MM/YYYY HH:mm" no es un formato estándar de new Date),
-      // intenta un parseo manual si el formato es conocido.
       if (isNaN(date.getTime()) && dateString.includes("/")) {
         const [datePart, timePart] = dateString.split(" ");
         const [day, month, year] = datePart.split("/");
-        // Intenta crear una fecha en formato YYYY-MM-DD para un parseo más robusto
         const isoLikeDate = `${year}-${month}-${day}${
           timePart ? "T" + timePart : ""
         }`;
@@ -195,7 +183,6 @@ function VuelosByDestinoPage() {
     }
   }, []);
 
-  // Manejo de estados iniciales con el estilo de HomePage
   if (!destino) {
     return (
       <div className="bg-white text-gray-900 font-sans pt-16 h-screen flex justify-center items-center">
@@ -206,10 +193,8 @@ function VuelosByDestinoPage() {
     );
   }
 
-  // Renderizado del componente principal
   return (
     <div className="bg-white text-gray-900 font-sans pt-16">
-      {/* Sección de Bienvenida/Encabezado */}
       <section className="py-10 bg-gradient-to-br from-white to-gray-100 text-center">
         <motion.h1
           className="text-5xl md:text-6xl font-extrabold mb-4"
@@ -230,14 +215,12 @@ function VuelosByDestinoPage() {
         </motion.p>
       </section>
 
-      {/* Sección del Buscador de Vuelos (solo por fecha) */}
       <section className="bg-gray-50 py-10">
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-4xl font-bold text-center mb-8">
             Filtrar vuelos por fecha
           </h2>
           <div className="flex flex-col md:flex-row gap-4 mb-8 items-center justify-center">
-            {/* Solo el input de fecha */}
             <input
               type="date"
               className="w-full md:w-1/4 px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
@@ -246,7 +229,6 @@ function VuelosByDestinoPage() {
             />
           </div>
 
-          {/* Resultados de la Búsqueda / Mensajes de estado */}
           {loading ? (
             <p className="text-center text-gray-600 text-xl py-8">
               Cargando vuelos para {destino}...
@@ -255,12 +237,12 @@ function VuelosByDestinoPage() {
             <p className="text-center text-red-500 text-xl py-8">
               Error al cargar vuelos: {error}
             </p>
-          ) : noResults && !searchDate ? ( // noResults solo si no hay filtro de fecha
+          ) : noResults && !searchDate ? (
             <p className="text-center text-gray-600 text-xl py-8">
               No se encontraron vuelos para el destino:{" "}
               <span className="font-bold">{destino}</span>.
             </p>
-          ) : filteredVuelos.length === 0 ? ( // Mensaje cuando no hay vuelos filtrados
+          ) : filteredVuelos.length === 0 ? (
             <p className="text-center text-gray-600 text-xl py-8">
               No hay vuelos disponibles para {destino} en la fecha seleccionada.
             </p>
@@ -277,9 +259,9 @@ function VuelosByDestinoPage() {
                     whileHover={{ scale: 1.03 }}
                     initial={{ opacity: 0, y: 40 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: i * 0.1 }} // Animación con delay
+                    transition={{ duration: 0.4, delay: i * 0.1 }}
                     viewport={{ once: true }}
-                    onClick={() => navigate(`/reservar/${vuelo._id}`)} // Navega a la página de detalle
+                    onClick={() => navigate(`/reservar/${vuelo._id}`)}
                   >
                     <img
                       src={
@@ -305,7 +287,6 @@ function VuelosByDestinoPage() {
                         Precio: ${vuelo.costo} USD
                       </p>
                     </div>
-                    {/* Overlay al pasar el mouse */}
                     <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <span className="text-white text-lg font-semibold">
                         Ver detalles y reservar
@@ -319,7 +300,6 @@ function VuelosByDestinoPage() {
         </div>
       </section>
 
-      {/* Footer (copiado de HomePage) */}
       <footer className="bg-gray-900 text-white text-center py-8 px-4">
         <p className="text-lg font-medium">
           ¿Tienes dudas? Contáctanos: contacto@aerolinea.com

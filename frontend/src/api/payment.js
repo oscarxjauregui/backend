@@ -1,9 +1,8 @@
-// src/api/payment.js
-import axios from "./axios"; // <-- Asegúrate de importar la instancia configurada
+import axios from "./axios";
 
 export const createCheckoutSession = async (data) => {
   try {
-    const res = await axios.post("/payment/create-checkout-session", data); // El '/payment' se añade a la baseURL
+    const res = await axios.post("/payment/create-checkout-session", data); 
     return res.data;
   } catch (error) {
     console.error("Error creating checkout session:", error);

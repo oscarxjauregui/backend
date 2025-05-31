@@ -27,7 +27,6 @@ export const NominaProvider = ({ children }) => {
     setNominaAzafatas([]);
 
     try {
-      // Fetch nómina de pilotos
       const resPilotos = await getNominaPilotosRequest(mes, anio);
       if (Array.isArray(resPilotos.data)) {
         setNominaPilotos(resPilotos.data);
@@ -38,8 +37,6 @@ export const NominaProvider = ({ children }) => {
         );
         setNominaPilotos([]);
       }
-
-      // Fetch nómina de azafatas
       const resAzafatas = await getNominaAzafatasRequest(mes, anio);
       if (Array.isArray(resAzafatas.data)) {
         setNominaAzafatas(resAzafatas.data);

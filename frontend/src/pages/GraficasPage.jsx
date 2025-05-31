@@ -128,16 +128,16 @@ const GraficasPage = () => {
 
   const generateColors = (numColors) => {
     const colors = [
-      "rgba(244, 63, 94, 0.7)", // Rose
-      "rgba(59, 130, 246, 0.7)", // Blue
-      "rgba(234, 179, 8, 0.7)", // Yellow
-      "rgba(20, 184, 166, 0.7)", // Teal
-      "rgba(168, 85, 247, 0.7)", // Purple
-      "rgba(251, 146, 60, 0.7)", // Orange
-      "rgba(139, 92, 246, 0.7)", // Violet
-      "rgba(249, 115, 22, 0.7)", // Amber
-      "rgba(100, 116, 139, 0.7)", // Slate
-      "rgba(217, 70, 239, 0.7)", // Fuchsia
+      "rgba(244, 63, 94, 0.7)",
+      "rgba(59, 130, 246, 0.7)",
+      "rgba(234, 179, 8, 0.7)",
+      "rgba(20, 184, 166, 0.7)",
+      "rgba(168, 85, 247, 0.7)",
+      "rgba(251, 146, 60, 0.7)",
+      "rgba(139, 92, 246, 0.7)",
+      "rgba(249, 115, 22, 0.7)",
+      "rgba(100, 116, 139, 0.7)",
+      "rgba(217, 70, 239, 0.7)",
     ];
     return Array.from(
       { length: numColors },
@@ -310,7 +310,6 @@ const GraficasPage = () => {
             ref={reportRef}
             className="bg-white p-6 rounded-lg text-gray-900 max-w-7xl mx-auto shadow-md"
           >
-            {/* Tarjetas resumen */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               {reportsToDisplay.map(({ periodo, data }) => (
                 <div
@@ -353,28 +352,21 @@ const GraficasPage = () => {
               ))}
             </div>
 
-            {/* Gráficos */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-              {/* Gráfico de barras */}
               <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
                   Ventas y Reservaciones por Período
                 </h2>
                 <div className="h-80">
-                  {" "}
-                  {/* Altura fija para el gráfico */}
                   <Bar data={ventasData} options={barOptions} />
                 </div>
               </div>
 
-              {/* Gráfico circular */}
               <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
                   Distribución de Reservaciones por Cliente
                 </h2>
                 <div className="h-80 flex items-center justify-center">
-                  {" "}
-                  {/* Centrar el Pie Chart */}
                   {sortedClientReportForChart.length > 0 ? (
                     <Pie data={clientesData} options={pieOptions} />
                   ) : (
@@ -386,7 +378,6 @@ const GraficasPage = () => {
               </div>
             </div>
 
-            {/* Tabla de clientes */}
             <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden mt-8">
               <div className="p-6 border-b border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-900">
